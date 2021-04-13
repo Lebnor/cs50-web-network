@@ -1,12 +1,20 @@
-version: '3'
-
-services: 
-    db:
-        image: postgres
-
-    web:
-        build: .
-        volumes: 
-            - .:/user/src/app
-        ports:
-            - "8000:8000"
+version: "3.9"
+   
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=d9e6ip2prvrrtn
+      - POSTGRES_USER=cdmasyfrtgfccj
+      - POSTGRES_PASSWORD=496670398bc0e350fcfa767d0db7863d687d0ec0314fdd2dc9f51454e6956106
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
