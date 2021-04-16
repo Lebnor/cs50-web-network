@@ -1,23 +1,166 @@
 {% extends "network/layout.html" %}
 
-{% block head %}
-        <!-- Load React. -->
-        <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
-        <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
-        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-{% endblock %}
 
 
 
 {% block body %}
 
-<script type="text/babel">
-    class Hello extends React.Component {
-        render() {
-            return (<h1> hello</h1>);
-        }
+ <script type="text/babel">
+
+
+    var context = {
+        user: '{{ user }}'
     }
 
-    ReactDOM.render(<Hello />, document.getElementById('root'));
+class Expire extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {visible:true}
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // reset the timer if children are changed
+    if (nextProps.children !== this.props.children) {
+      this.setTimer();
+      this.setState({visible: true});
+    }
+  }
+
+  componentDidMount() {
+    this.setTimer();
+  }
+
+  setTimer() {
+    // clear any existing timer
+    if (this._timer != null) {
+      clearTimeout(this._timer)
+    }
+
+    // hide after `delay` milliseconds
+    this._timer = setTimeout(function(){
+      this.setState({visible: false});
+      this._timer = null;
+    }.bind(this), this.props.delay);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._timer);
+  }
+
+  render() {
+    return this.state.visible
+      ? <div>{this.props.children}</div>
+      : <span />;
+  }
+}
+    
+    class Post extends React.Component {
+        constructor(props) {
+            super(props)
+
+        }
+
+        render() {
+            let post = this.props.post;
+
+            return (
+            <div key={post.id} className="m-2 p-4 border border-info">
+                <p> <strong>Author: </strong> {post.poster}</p>
+                <p> <strong>Body: </strong> {post.text}</p>
+                <p> <strong>Likes: </strong> {post.likes}</p>
+                <p> <strong>Date: </strong> {post.timestamp} </p>                                    
+            </div>
+            )
+        }
+    }
+    class Posts extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                posts: []
+            }
+        }
+
+
+        showPosts() {
+            fetch("/posts")
+                    .then(response => response.json())
+                    .then( ( data ) => {
+                        console.log(data);
+                        this.setState( {
+                            posts: data,
+                            loadingPosts: 
+                            
+                                <Expire delay="5000">
+                                    <p className="text-success">Loaded posts successfully</p>
+                                </Expire>
+                            });
+
+                    })
+                    .catch( (e)=>{
+                        console.log(e);
+                        this.setState({
+                            loadingPosts: <p className="text-danger">Failed to load posts</p>
+                        })
+                    });
+
+        }
+
+        render() {
+
+            var postItems = this.props.posts.map( post => {
+                <div>
+                    <Post post={post}> </Post>
+                </div>
+            });
+
+            console.log(postItems);
+            
+            let posts = this.state.posts;
+            return (
+                <div className="container">
+                    <div className="">
+                        <div className="row justify-content-center">
+                            <h3> Loading posts made by: {context.user} </h3>
+                        </div>
+                        <div className="row justify-content-center">
+                            <button className="btn btn-primary m-2" onClick={()=> {
+                                this.showPosts()
+                                this.setState({
+                                    loadingPosts: <p className="text-dark">Loading posts... </p>
+                                })
+
+                            }
+                            }>Load posts </button>
+                        </div>
+                        <div className="row  justify-content-center">
+                            <div className="">
+                                {this.state.loadingPosts}
+                            </div>
+                        </div>
+                        <div className="row justify-content-center">
+                            <div className="col-6">
+                                {postItems}
+                                {this.state.posts.map(post => 
+                                    <Post key={post.id} post={post}> </Post>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        
+    }
+    let posts = [];
+    
+    fetch("/posts")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                ReactDOM.render(<Posts posts={data}/>, document.getElementById('root'));
+            });
+    ReactDOM.render(<Posts posts={posts}/>, document.getElementById('root'));
 </script>
 {% endblock %}

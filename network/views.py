@@ -1,14 +1,21 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.core import serializers
 
-from .models import User
+from .models import User, Comment, Post
+import json 
+
 
 
 def index(request):
-    return render(request, "network/index.html")
+    posts = Post.objects.filter().all()
+    return render(request, "network/index.html", {
+        'user': request.user,
+        'posts': posts,
+    })
 
 
 def login_view(request):
@@ -61,3 +68,27 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+
+def posts(request):
+    # sort posts by reverse chronological order
+    inList = []
+    posts = Post.objects.filter(poster=request.user).order_by('-timestamp').all()
+
+    for post in posts:
+        inList.append(post.serialize())
+    # posts_list = serializers.serialize('json', inList, indent=2, use_natural_foreign_keys=True)
+
+    return JsonResponse(inList, safe=False)
+
+# give like to a post
+def like(request, id):
+    post = Post.objects.get(id=id)
+    post.likes = post.likes + 1
+    post.save()
+
+# give dislike to a post
+def dislike(request, id):
+    post = Post.objects.get(id=id)
+    post.likes = post.likes - 1
+    post.save()

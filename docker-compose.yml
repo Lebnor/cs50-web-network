@@ -6,9 +6,9 @@ services:
     volumes:
       - ./data/db:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=d9e6ip2prvrrtn
-      - POSTGRES_USER=cdmasyfrtgfccj
-      - POSTGRES_PASSWORD=496670398bc0e350fcfa767d0db7863d687d0ec0314fdd2dc9f51454e6956106
+      - POSTGRES_DB=d2gau69pqfq9t5
+      - POSTGRES_USER=rsdxvtwclivwlo
+      - POSTGRES_PASSWORD=3225fe19840dfba066e40975f68bb2a9d0b350d212686c86f38fdb39cf92368a
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
