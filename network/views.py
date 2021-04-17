@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.core import serializers
+from datetime import date
 
 from .models import User, Comment, Post
 import json 
@@ -77,6 +78,17 @@ def posts(request):
         inList.append(post.serialize())
 
     return JsonResponse(inList, safe=False)
+
+def create(request, text):
+    poster = request.user
+    timestamp = date.today()
+    
+    post = Post(poster=poster, text=text, timestamp=timestamp, likes=0)
+    post.save()
+
+    # TODO response
+    return JsonResponse({})
+
 
 # give like to a post
 def like(request, id):

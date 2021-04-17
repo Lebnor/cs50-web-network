@@ -41,8 +41,11 @@ class NewPost extends React.Component {
     }
 
     handleOnSubmit() {
-        // TODO call API to create this new post
-        fetch("").then().then().catch();
+        // TODO add some checks
+        fetch("/posts/create/" + this.state.textAreaValue).
+        then()
+        .then()
+        .catch();
 
         this.setState( {
             textAreaValue: ''
