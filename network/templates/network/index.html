@@ -13,7 +13,62 @@
 
  <script type="text/babel">
 
+    var context = {
+        user: `{{ user }}`
+    }
     
+class NewPost extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = ( {
+            textAreaValue: 'Type your post here...',
+            firstClick: true
+        })
+    }
+    handleKeyDown() {
+        if (this.state.firstClick) {
+            this.setState( {
+                textAreaValue: '',
+                firstClick: false
+            })
+        }
+    }
+    handleOnChange(event) {
+            this.setState( {
+            textAreaValue: event.target.value
+        })
+        
+    }
+
+    handleOnSubmit() {
+        // TODO call API to create this new post
+        fetch("").then().then().catch();
+
+        this.setState( {
+            textAreaValue: ''
+        })
+    }
+    render() {
+        
+        return (
+            <div className="col-8 border text-center  m-3">
+
+                <h3 className="text-white m-3"><span className="rounded p-2">New Post</span> </h3>
+            <div className="row  justify-content-center p-2">    
+                <div className="col-8 p-2">
+                    <form>
+                    <textarea onKeyDown={ () => this.handleKeyDown()} onChange={ (event) => this.handleOnChange(event)} className="form-control" value={this.state.textAreaValue}></textarea>
+                    
+                    <div className="text-center m-2">
+                        <input onClick={ () => this.handleOnSubmit()} className="btn btn-outline-primary" type="submit" value="Submit"></input>
+                    </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+}
 class Load extends React.Component {
         render() {
             return (
@@ -140,6 +195,9 @@ class Post extends React.Component {
             return (
                 <div className="container">
                     <div className="">
+                        <div className="row justify-content-center">
+                            <NewPost> </NewPost>
+                        </div>
                         <div className="row justify-content-center">
                             <h3 className="my-2"> <span className="p-2 rounded">Showing all posts</span> </h3>
                         </div>

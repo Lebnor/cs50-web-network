@@ -1,5 +1,9 @@
 h3 {
-    font-weight: 400;
+    font-weight: 400;   
+}
+
+h3 > p {
+    background-color: green;
 }
 
 h3 > span {

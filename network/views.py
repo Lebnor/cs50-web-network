@@ -12,7 +12,7 @@ import json
 
 def index(request):
     return render(request, "network/index.html", {
-        
+        'user': request.user
     })
 
 
