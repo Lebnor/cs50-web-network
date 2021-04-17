@@ -23,7 +23,7 @@ class Post(models.Model):
             "timestamp": self.timestamp
         }
     def __str__(self):
-        return serialize(self)
+        return f'{self.id}: {self.poster.username}'
 
 class Comment(models.Model):
     text = models.TextField()

@@ -5,12 +5,26 @@
 
 {% block body %}
 
+<!-- starting point of react app -->
+<div class="body" id="root">
+
+</div>
+
+
  <script type="text/babel">
 
-
-    var context = {
-        user: '{{ user }}'
+    
+class Load extends React.Component {
+        render() {
+            return (
+                <div className="row justify-content-center">
+                <p className="loader mx-2"> </p> 
+                     {this.props.message}
+                 </div>
+            )
+        }
     }
+
 
 class Expire extends React.Component {
   constructor(props) {
@@ -54,10 +68,9 @@ class Expire extends React.Component {
   }
 }
     
-    class Post extends React.Component {
+class Post extends React.Component {
         constructor(props) {
             super(props)
-
         }
 
         render() {
@@ -77,12 +90,13 @@ class Expire extends React.Component {
         constructor(props) {
             super(props);
             this.state = {
-                posts: []
+                posts: false
             }
         }
 
 
         showPosts() {
+            
             fetch("/posts")
                     .then(response => response.json())
                     .then( ( data ) => {
@@ -100,38 +114,44 @@ class Expire extends React.Component {
                     .catch( (e)=>{
                         console.log(e);
                         this.setState({
-                            loadingPosts: <p className="text-danger">Failed to load posts</p>
-                        })
+                            loadingPosts: <Expire>
+                                            <p className="text-danger"> Failed to load posts</p>
+                                          </Expire>
+                                        })
                     });
 
         }
 
         render() {
-
-            var postItems = this.props.posts.map( post => {
-                <div>
-                    <Post post={post}> </Post>
-                </div>
-            });
-
-            console.log(postItems);
+           
             
-            let posts = this.state.posts;
+            let loadingIcon = <Load message={'loading...'}> </Load>
+            if (this.props.loading === false) {
+                loadingIcon = <span> </span>
+            }
+
+            // read posts from props or update it from state
+            let posts;
+            if (this.state.posts) {
+                posts = this.state.posts.map(post => <Post key={post.id} post={post}> </Post>);
+            } else {
+                posts = this.props.posts.map(post => <Post key={post.id} post={post}> </Post>)
+            }
             return (
                 <div className="container">
                     <div className="">
                         <div className="row justify-content-center">
-                            <h3> Loading posts made by: {context.user} </h3>
+                            <h3 className="my-2"> <span className="p-2 rounded">Showing all posts</span> </h3>
                         </div>
                         <div className="row justify-content-center">
                             <button className="btn btn-primary m-2" onClick={()=> {
                                 this.showPosts()
                                 this.setState({
-                                    loadingPosts: <p className="text-dark">Loading posts... </p>
+                                    loadingPosts: <Load message={'Loading posts...'}> </Load>
                                 })
 
                             }
-                            }>Load posts </button>
+                            }>Reload posts </button>
                         </div>
                         <div className="row  justify-content-center">
                             <div className="">
@@ -139,11 +159,9 @@ class Expire extends React.Component {
                             </div>
                         </div>
                         <div className="row justify-content-center">
-                            <div className="col-6">
-                                {postItems}
-                                {this.state.posts.map(post => 
-                                    <Post key={post.id} post={post}> </Post>
-                                )}
+                            <div className="col-10 col-md-8">
+                                {loadingIcon}
+                                {posts}
                             </div>
                         </div>
                     </div>
@@ -153,14 +171,12 @@ class Expire extends React.Component {
 
         
     }
-    let posts = [];
     
     fetch("/posts")
             .then(response => response.json())
             .then(data => {
-                console.log(data);
-                ReactDOM.render(<Posts posts={data}/>, document.getElementById('root'));
+                ReactDOM.render(<Posts posts={data} loading={false}/>, document.getElementById('root'));
             });
-    ReactDOM.render(<Posts posts={posts}/>, document.getElementById('root'));
+    ReactDOM.render(<Posts posts={[]}/>, document.getElementById('root'));
 </script>
 {% endblock %}

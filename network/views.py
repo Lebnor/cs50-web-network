@@ -11,10 +11,8 @@ import json
 
 
 def index(request):
-    posts = Post.objects.filter().all()
     return render(request, "network/index.html", {
-        'user': request.user,
-        'posts': posts,
+        
     })
 
 
@@ -73,11 +71,10 @@ def register(request):
 def posts(request):
     # sort posts by reverse chronological order
     inList = []
-    posts = Post.objects.filter(poster=request.user).order_by('-timestamp').all()
+    posts = Post.objects.order_by('-timestamp').all()
 
     for post in posts:
         inList.append(post.serialize())
-    # posts_list = serializers.serialize('json', inList, indent=2, use_natural_foreign_keys=True)
 
     return JsonResponse(inList, safe=False)
 
