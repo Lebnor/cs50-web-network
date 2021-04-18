@@ -1,14 +1,40 @@
 h3 {
     font-weight: 400;   
 }
-
-h3 > p {
-    background-color: green;
+/* 
+.button-outline {
+    background-color: white;
+    color: #006064;
+}
+.button-outline:hover {
+    background-color: #006064;
+    color: white;
+} */
+.primary-color {
+    background-color: #004D40;
+}
+.secondary-color {
+    background-color: #006064;
+}
+.secondary-color-text {
+    color: #01579B;
+}
+span {
+    display: inline-block;
+}
+button {
+    background-color: #006064;
+    color: white;
 }
 
+
 h3 > span {
-    background-color: green;
+    background-color: #004D40;
     color: whitesmoke;
+}
+
+.btn {
+    background-color: #006064;
 }
 
 .loader {

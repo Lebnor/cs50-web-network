@@ -11,122 +11,143 @@
 </div>
 
 
- <script type="text/babel">
+<script type="text/babel">
 
     var context = {
         user: `{{ user }}`
     }
-    
-class NewPost extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = ( {
-            textAreaValue: 'Type your post here...',
-            firstClick: true
-        })
-    }
-    handleKeyDown() {
-        if (this.state.firstClick) {
-            this.setState( {
-                textAreaValue: '',
-                firstClick: false
+
+    class NewPost extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = ({
+                textAreaValue: 'Type your post here...',
+                firstClick: true
             })
         }
-    }
-    handleOnChange(event) {
-            this.setState( {
-            textAreaValue: event.target.value
-        })
-        
-    }
+        handleKeyDown() {
+            if (this.state.firstClick) {
+                this.setState({
+                    textAreaValue: '',
+                    firstClick: false
+                })
+            }
+            if (this.state.textAreaValue === '') {
+                document.getElementById('submit').disabled = true;
+            } else {
+                document.getElementById('submit').disabled = false;
+            }
+        }
+        handleOnChange(event) {
+            this.setState({
+                textAreaValue: event.target.value
+            })
+        }
 
-    handleOnSubmit() {
-        // TODO add some checks
-        fetch("/posts/create/" + this.state.textAreaValue).
-        then()
-        .then()
-        .catch();
 
-        this.setState( {
-            textAreaValue: ''
-        })
-    }
-    render() {
-        
-        return (
-            <div className="col-8 border text-center  m-3">
 
-                <h3 className="text-white m-3"><span className="rounded p-2">New Post</span> </h3>
-            <div className="row  justify-content-center p-2">    
-                <div className="col-8 p-2">
-                    <form>
-                    <textarea onKeyDown={ () => this.handleKeyDown()} onChange={ (event) => this.handleOnChange(event)} className="form-control" value={this.state.textAreaValue}></textarea>
-                    
-                    <div className="text-center m-2">
-                        <input onClick={ () => this.handleOnSubmit()} className="btn btn-outline-primary" type="submit" value="Submit"></input>
-                    </div>
-                        </form>
+        handleOnSubmit() {
+            console.log('onsubmit')
+            console.log(this.state.textAreaValue)
+            // TODO add some checks
+            fetch("posts/create/" + this.state.textAreaValue)
+                .then(response => response.json())
+                .then( data =>
+                    this.setState({
+                        textAreaValue: ''
+                    })
+                )
+                .catch();
+
+
+
+
+        }
+        render() {
+
+            return (
+                <div className="col-8 border text-center  m-3">
+
+                    <h3 className="text-white m-3"><span className="rounded p-2">New Post</span> </h3>
+                    <div className="row  justify-content-center pb-2">
+                        <div className="col-8">
+                            <form>
+                                <textarea required
+                                    onKeyDown={() => this.handleKeyDown()}
+                                    onChange={(event) => this.handleOnChange(event)}
+                                    className="form-control" value={this.state.textAreaValue}>
+                                </textarea>
+
+                                <div className="text-center m-2">
+                                    <input id="submit"
+                                        onClick={() => this.handleOnSubmit()}
+                                        className="btn btn-outline-info" type="submit" value="Submit">
+                                    </input>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        )
+            )
+        }
     }
-}
-class Load extends React.Component {
+    class Load extends React.Component {
         render() {
             return (
                 <div className="row justify-content-center">
-                <p className="loader mx-2"> </p> 
-                     {this.props.message}
-                 </div>
+                    <p className="loader mx-2"> </p>
+                    {this.props.message}
+                </div>
             )
         }
     }
 
 
-class Expire extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {visible:true}
-  }
+    class Expire extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                visible: true
+            }
+        }
 
-  componentWillReceiveProps(nextProps) {
-    // reset the timer if children are changed
-    if (nextProps.children !== this.props.children) {
-      this.setTimer();
-      this.setState({visible: true});
+        componentWillReceiveProps(nextProps) {
+            // reset the timer if children are changed
+            if (nextProps.children !== this.props.children) {
+                this.setTimer();
+                this.setState({ visible: true });
+            }
+        }
+
+        componentDidMount() {
+            this.setTimer();
+        }
+
+        setTimer() {
+            // clear any existing timer
+            if (this._timer != null) {
+                clearTimeout(this._timer)
+            }
+
+            // hide after `delay` milliseconds
+            this._timer = setTimeout(function () {
+                this.setState({ visible: false });
+                this._timer = null;
+            }.bind(this), this.props.delay);
+        }
+
+        componentWillUnmount() {
+            clearTimeout(this._timer);
+        }
+
+        render() {
+            return this.state.visible
+                ? <div>{this.props.children}</div>
+                : <span />;
+        }
     }
-  }
 
-  componentDidMount() {
-    this.setTimer();
-  }
-
-  setTimer() {
-    // clear any existing timer
-    if (this._timer != null) {
-      clearTimeout(this._timer)
-    }
-
-    // hide after `delay` milliseconds
-    this._timer = setTimeout(function(){
-      this.setState({visible: false});
-      this._timer = null;
-    }.bind(this), this.props.delay);
-  }
-
-  componentWillUnmount() {
-    clearTimeout(this._timer);
-  }
-
-  render() {
-    return this.state.visible
-      ? <div>{this.props.children}</div>
-      : <span />;
-  }
-}
-    
-class Post extends React.Component {
+    class Post extends React.Component {
         constructor(props) {
             super(props)
         }
@@ -135,12 +156,12 @@ class Post extends React.Component {
             let post = this.props.post;
 
             return (
-            <div key={post.id} className="m-2 p-4 border border-info">
-                <p> <strong>Author: </strong> {post.poster}</p>
-                <p> <strong>Body: </strong> {post.text}</p>
-                <p> <strong>Likes: </strong> {post.likes}</p>
-                <p> <strong>Date: </strong> {post.timestamp} </p>                                    
-            </div>
+                <div key={post.id} className="mx-2 mb-2 p-4 border border-info">
+                    <p> <strong>Author: </strong> {post.poster}</p>
+                    <p> <strong>Body: </strong> {post.text}</p>
+                    <p> <strong>Likes: </strong> {post.likes}</p>
+                    <p> <strong>Date: </strong> {post.timestamp} </p>
+                </div>
             )
         }
     }
@@ -154,35 +175,35 @@ class Post extends React.Component {
 
 
         showPosts() {
-            
-            fetch("/posts")
-                    .then(response => response.json())
-                    .then( ( data ) => {
-                        console.log(data);
-                        this.setState( {
-                            posts: data,
-                            loadingPosts: 
-                            
-                                <Expire delay="5000">
-                                    <p className="text-success">Loaded posts successfully</p>
-                                </Expire>
-                            });
 
-                    })
-                    .catch( (e)=>{
-                        console.log(e);
-                        this.setState({
-                            loadingPosts: <Expire>
-                                            <p className="text-danger"> Failed to load posts</p>
-                                          </Expire>
-                                        })
+            fetch("/posts")
+                .then(response => response.json())
+                .then((data) => {
+                    console.log(data);
+                    this.setState({
+                        posts: data,
+                        loadingPosts:
+
+                            <Expire delay="2000">
+                                <p className="secondary-color-text">Loaded posts successfully</p>
+                            </Expire>
                     });
+
+                })
+                .catch((e) => {
+                    console.log(e);
+                    this.setState({
+                        loadingPosts: <Expire>
+                            <p className="text-danger"> Failed to load posts</p>
+                        </Expire>
+                    })
+                });
 
         }
 
         render() {
-           
-            
+
+
             let loadingIcon = <Load message={'loading...'}> </Load>
             if (this.props.loading === false) {
                 loadingIcon = <span> </span>
@@ -204,24 +225,28 @@ class Post extends React.Component {
                         <div className="row justify-content-center">
                             <h3 className="my-2"> <span className="p-2 rounded">Showing all posts</span> </h3>
                         </div>
-                        <div className="row justify-content-center">
-                            <button className="btn btn-primary m-2" onClick={()=> {
-                                this.showPosts()
-                                this.setState({
-                                    loadingPosts: <Load message={'Loading posts...'}> </Load>
-                                })
+                        <div className="row justify-content-center my-1">
+                            <div className="col-9 col-md-7">
+                                <div className="row justify-content-end">
+                                    <button className="text-white btn m-0" onClick={() => {
+                                        this.showPosts()
+                                        this.setState({
+                                            loadingPosts: <Load message={'Loading posts...'}> </Load>
+                                        })
 
-                            }
-                            }>Reload posts </button>
-                        </div>
-                        <div className="row  justify-content-center">
-                            <div className="">
-                                {this.state.loadingPosts}
+                                    }
+                                    }>Reload posts </button>
+                                </div>
+                                <div className="row justify-content-center">
+                                    {this.state.loadingPosts}
+                                    {loadingIcon}
+                                </div>
                             </div>
                         </div>
+
                         <div className="row justify-content-center">
                             <div className="col-10 col-md-8">
-                                {loadingIcon}
+
                                 {posts}
                             </div>
                         </div>
@@ -230,14 +255,14 @@ class Post extends React.Component {
             );
         }
 
-        
+
     }
-    
+
     fetch("/posts")
-            .then(response => response.json())
-            .then(data => {
-                ReactDOM.render(<Posts posts={data} loading={false}/>, document.getElementById('root'));
-            });
-    ReactDOM.render(<Posts posts={[]}/>, document.getElementById('root'));
+        .then(response => response.json())
+        .then(data => {
+            ReactDOM.render(<Posts posts={data} loading={false} />, document.getElementById('root'));
+        });
+    ReactDOM.render(<Posts posts={[]} />, document.getElementById('root'));
 </script>
 {% endblock %}

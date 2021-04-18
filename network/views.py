@@ -4,11 +4,10 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.core import serializers
-from datetime import date
+from datetime import datetime
 
 from .models import User, Comment, Post
-import json 
-
+import json
 
 
 def index(request):
@@ -79,13 +78,14 @@ def posts(request):
 
     return JsonResponse(inList, safe=False)
 
+
 def create(request, text):
     poster = request.user
-    timestamp = date.today()
-    
+    timestamp = datetime.now()
     post = Post(poster=poster, text=text, timestamp=timestamp, likes=0)
     post.save()
 
+    print(post)
     # TODO response
     return JsonResponse({})
 
@@ -97,6 +97,8 @@ def like(request, id):
     post.save()
 
 # give dislike to a post
+
+
 def dislike(request, id):
     post = Post.objects.get(id=id)
     post.likes = post.likes - 1
