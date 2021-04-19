@@ -18,7 +18,10 @@ class Post(models.Model):
     def serialize(self):
         return {
             "id": self.pk,
-            "poster": self.poster.username,
+            "poster": {
+                "id": self.poster.id,
+                "username": self.poster.username
+            },
             "text": self.text,
             "likes": self.likes,
             "timestamp": self.timestamp

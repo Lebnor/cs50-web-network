@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.core import serializers
+from django.core.paginator import Paginator
 from datetime import datetime
 
 from .models import User, Comment, Post
@@ -77,6 +78,7 @@ def posts(request):
         inList.append(post.serialize())
 
     return JsonResponse(inList, safe=False)
+    # return JsonResponse(inPages, safe=False)
 
 
 def create(request, text):

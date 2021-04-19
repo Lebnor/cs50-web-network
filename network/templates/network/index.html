@@ -18,6 +18,156 @@
         user: `{{ user }}`
     }
 
+    class Page extends React.Component {
+        constructor(props) {
+            super(props)
+
+            this.state = {
+                currentPage: 0
+            }
+        }
+
+        render() {
+
+            let display;
+            if (this.props.data) {
+                display = this.props.data.map(item => {
+                    return (
+                        <div>
+                            {item}
+                        </div>
+                    )
+                })
+            }
+            return (
+                <div>
+                </div>
+            )
+        }
+    }
+
+
+    class Paginator extends React.Component {
+        constructor(props) {
+            super(props)
+
+            this.state = {
+                pages: [],
+                currentPage: 0
+            }
+        }
+        fillPages() {
+
+        }
+
+        updatePageCounter(increment) {
+            if (!this.state.currentPage) {
+                this.state.currentPage = 0;
+            }
+
+            this.setState({
+                currentPage: this.state.currentPage + increment
+            })
+        }
+
+        nextClassName(pageIndex, max) {
+            return pageIndex >= max - 1 ? "page-item disabled" : "page-item";
+        }
+        prevClassName(pageIndex, max) {
+            return pageIndex <= 0 ? "page-item disabled" : "page-item";
+        }
+
+        render() {
+            // empty props, nothing to show
+            if (this.props.data.length === 0) {
+                return (
+                    <div></div>
+                )
+            }
+
+            let pagesCounter = 0;
+            let pages = [];
+            let page = [];
+            for (let i = 0; i < this.props.data.length; i++) {
+                if ((i % 9 === 0 && i !== 0) || i === this.props.data.length - 1) {
+                    page.push(this.props.data[i]);
+                    pages[pagesCounter] = page;
+                    pagesCounter++;
+                    page = [];
+                } else {
+                    page.push(this.props.data[i]);
+                }
+            }
+
+            let pageIndex = this.state.currentPage ? this.state.currentPage : 0;
+            page = pages[pageIndex];
+
+
+            const previousButton = <li className={this.prevClassName(pageIndex, pages.length)}><a className="page-link" href="#"
+                onClick={() => this.updatePageCounter(-1)}
+            >Previous</a>
+            </li>;
+
+            const nextButton = <li className={this.nextClassName(pageIndex, pages.length)}><a className="page-link" href="#"
+                onClick={() => this.updatePageCounter(1)}
+            >Next</a>
+            </li>;
+
+            return (
+
+                <div className="">
+                    <div className="row justify-content-between px-4">
+                            <h3 > Page {pageIndex + 1} </h3>
+                            <nav className="align-self-center" aria-label="Page navigation">
+                                <ul className="pagination">
+                                    {previousButton}
+                                    {pages.map((page, index) => {
+                                        return (
+                                            <li key={index} className="page-item">
+                                                <a className="page-link" href="#"
+                                                    onClick={() => {
+                                                        this.setState({
+                                                            currentPage: index
+                                                        })
+                                                    }}> {index + 1} </a>
+                                            </li>
+                                        )
+                                    })}
+                                    {nextButton}
+                                </ul>
+                            </nav>
+                            <button className="align-self-start btn btn-primary"> Reload posts </button>
+                    </div>
+                    {page.map((post, index) => {
+                        return (
+                            <div key={post.id}>
+                                <Post post={post}> </Post>
+                            </div>
+                        )
+                    })}
+                    <nav aria-label="Page navigation">
+                        <ul className="pagination">
+                            {previousButton}
+                            {pages.map((page, index) => {
+                                return (
+                                    <li key={index} className="page-item">
+                                        <a className="page-link" href="#"
+                                            onClick={() => {
+                                                this.setState({
+                                                    currentPage: index
+                                                })
+                                            }}> {index + 1} </a>
+                                    </li>
+                                )
+                            })}
+                            {nextButton}
+                        </ul>
+                    </nav>
+                </div>
+
+            )
+        }
+    }
     class NewPost extends React.Component {
         constructor(props) {
             super(props);
@@ -53,7 +203,7 @@
             // TODO add some checks
             fetch("posts/create/" + this.state.textAreaValue)
                 .then(response => response.json())
-                .then( data =>
+                .then(data =>
                     this.setState({
                         textAreaValue: ''
                     })
@@ -65,34 +215,34 @@
 
         }
         render() {
-            var notLoggedIn = <p className="text-danger">Please 
+            var notLoggedIn = <p className="text-danger">Please
                  <a href="{% url 'login' %}"> Log in </a>
-                 or 
+                 or
                  <a href="{% url 'register' %}"> Register </a>
                   to make a new post.</p>
             var loggedIn = <div className="col-8">
-                            <form>
-                                <textarea required
-                                    onKeyDown={() => this.handleKeyDown()}
-                                    onChange={(event) => this.handleOnChange(event)}
-                                    className="form-control" value={this.state.textAreaValue}>
-                                </textarea>
+                <form>
+                    <textarea required
+                        onKeyDown={() => this.handleKeyDown()}
+                        onChange={(event) => this.handleOnChange(event)}
+                        className="form-control" value={this.state.textAreaValue}>
+                    </textarea>
 
-                                <div className="text-center m-2">
-                                    <input id="submit"
-                                        onClick={() => this.handleOnSubmit()}
-                                        className="btn btn-outline-info" type="submit" value="Submit">
-                                    </input>
-                                </div>
-                            </form>
-                        </div>;
+                    <div className="text-center m-2">
+                        <input id="submit"
+                            onClick={() => this.handleOnSubmit()}
+                            className="btn btn-outline-info" type="submit" value="Submit">
+                        </input>
+                    </div>
+                </form>
+            </div>;
 
-                let content;
-                if (context.user === 'AnonymousUser') { // not logged in
-                    content = notLoggedIn;
-                } else {
-                    content = loggedIn;
-                }
+            let content;
+            if (context.user === 'AnonymousUser') { // not logged in
+                content = notLoggedIn;
+            } else {
+                content = loggedIn;
+            }
             return (
                 <div className="col-8 border text-center  m-3">
 
@@ -104,6 +254,7 @@
             )
         }
     }
+
     class Load extends React.Component {
         render() {
             return (
@@ -114,7 +265,6 @@
             )
         }
     }
-
 
     class Expire extends React.Component {
         constructor(props) {
@@ -160,17 +310,21 @@
         }
     }
 
+    // receives as props a json object representing a post
     class Post extends React.Component {
         constructor(props) {
             super(props)
         }
 
+        handleOnClick(id) {
+            ReactDOM.render(<Post post={this.props.post} />, document.getElementById('root'));
+        }
         render() {
             let post = this.props.post;
 
             return (
                 <div key={post.id} className="mx-2 mb-2 p-4 border border-info">
-                    <p> <strong>Author: </strong> {post.poster}</p>
+                    <p> <strong>Author: </strong> <a href="#" onClick={() => this.handleOnClick(post.poster.id)}>{post.poster.username} </a></p>
                     <p> <strong>Body: </strong> {post.text}</p>
                     <p> <strong>Likes: </strong> {post.likes}</p>
                     <p> <strong>Date: </strong> {post.timestamp} </p>
@@ -178,6 +332,7 @@
             )
         }
     }
+
     class Posts extends React.Component {
         constructor(props) {
             super(props);
@@ -197,7 +352,7 @@
                         posts: data,
                         loadingPosts:
 
-                            <Expire delay="2000">
+                            <Expire delay="1000">
                                 <p className="secondary-color-text">Loaded posts successfully</p>
                             </Expire>
                     });
@@ -216,19 +371,21 @@
 
         render() {
 
+            // read posts from props or update it from state
+            let posts;
+            if (this.state.posts) {
+                posts = this.state.posts;
+            } else {
+                posts = this.props.posts;
+            }
+
 
             let loadingIcon = <Load message={'loading...'}> </Load>
             if (this.props.loading === false) {
                 loadingIcon = <span> </span>
             }
 
-            // read posts from props or update it from state
-            let posts;
-            if (this.state.posts) {
-                posts = this.state.posts.map(post => <Post key={post.id} post={post}> </Post>);
-            } else {
-                posts = this.props.posts.map(post => <Post key={post.id} post={post}> </Post>)
-            }
+            let postsList = posts.map(post => <Post key={post.id} post={post}> </Post>)
             return (
                 <div className="container">
                     <div className="">
@@ -240,27 +397,29 @@
                         </div>
                         <div className="row justify-content-center my-1">
                             <div className="col-9 col-md-7">
-                                <div className="row justify-content-end">
-                                    <button className="text-white btn m-0" onClick={() => {
+                                <div className="row justify-content-center">
+                                    <button className="mx-4 text-white btn m-0" onClick={() => {
                                         this.showPosts()
                                         this.setState({
-                                            loadingPosts: <Load message={'Loading posts...'}> </Load>
+                                            loadingPosts: <Load className="align-self-center" message={'Loading posts...'}> </Load>
                                         })
 
                                     }
-                                    }>Reload posts </button>
-                                </div>
-                                <div className="row justify-content-center">
-                                    {this.state.loadingPosts}
+                                    }>Reload posts
+                                    </button>
+
                                     {loadingIcon}
+                                    {this.state.loadingPosts}
+
                                 </div>
+
                             </div>
                         </div>
 
                         <div className="row justify-content-center">
                             <div className="col-10 col-md-8">
 
-                                {posts}
+                                <Paginator data={posts}> </Paginator>
                             </div>
                         </div>
                     </div>

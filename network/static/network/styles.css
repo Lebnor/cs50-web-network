@@ -16,6 +16,9 @@ h3 {
 .secondary-color {
     background-color: #006064;
 }
+.teritiary-color {
+    background-color: #01579B;
+}
 .secondary-color-text {
     color: #01579B;
 }
@@ -25,16 +28,17 @@ span {
 button {
     background-color: #006064;
     color: white;
+    border-radius: 5px;
 }
 
 
 h3 > span {
-    background-color: #004D40;
-    color: whitesmoke;
+    background-color: #006064;
+    color: white;
 }
 
 .btn {
-    background-color: #006064;
+    background-color: #01579B;
 }
 
 .loader {
