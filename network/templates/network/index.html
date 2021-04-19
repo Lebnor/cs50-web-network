@@ -1,5 +1,6 @@
 {% extends "network/layout.html" %}
 
+{% load static %}
 
 
 
@@ -64,13 +65,12 @@
 
         }
         render() {
-
-            return (
-                <div className="col-8 border text-center  m-3">
-
-                    <h3 className="text-white m-3"><span className="rounded p-2">New Post</span> </h3>
-                    <div className="row  justify-content-center pb-2">
-                        <div className="col-8">
+            var notLoggedIn = <p className="text-danger">Please 
+                 <a href="{% url 'login' %}"> Log in </a>
+                 or 
+                 <a href="{% url 'register' %}"> Register </a>
+                  to make a new post.</p>
+            var loggedIn = <div className="col-8">
                             <form>
                                 <textarea required
                                     onKeyDown={() => this.handleKeyDown()}
@@ -85,7 +85,20 @@
                                     </input>
                                 </div>
                             </form>
-                        </div>
+                        </div>;
+
+                let content;
+                if (context.user === 'AnonymousUser') { // not logged in
+                    content = notLoggedIn;
+                } else {
+                    content = loggedIn;
+                }
+            return (
+                <div className="col-8 border text-center  m-3">
+
+                    <h3 className="text-white m-3"><span className="rounded p-2">New Post</span> </h3>
+                    <div className="row  justify-content-center pb-2">
+                        {content}
                     </div>
                 </div>
             )
