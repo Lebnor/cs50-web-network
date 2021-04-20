@@ -7,8 +7,6 @@ from django.contrib import admin
 class ProfileAdmin(admin.ModelAdmin):
     filter_horizontal = ('following',)
 
-
-
 class User(AbstractUser):
 
     def serialize(self):
@@ -22,7 +20,7 @@ class User(AbstractUser):
 
 class Profile(models.Model):
     user = models.ForeignKey(User, related_name='profile', on_delete=models.CASCADE)
-    following = models.ManyToManyField(User, related_name='followers')
+    following = models.ManyToManyField(User, related_name='followers', null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.username}'s profile"

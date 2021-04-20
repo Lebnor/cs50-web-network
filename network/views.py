@@ -63,6 +63,9 @@ def register(request):
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
+
+            profile = Profile(user=user)
+            profile.save()
         except IntegrityError:
             return render(request, "network/register.html", {
                 "message": "Username already taken."
