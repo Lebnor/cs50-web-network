@@ -16,6 +16,10 @@ def index(request):
         'user': request.user
     })
 
+def profile(request, profile):
+    return render(request, "network/index.html", {
+        "profile": profile
+    })
 
 def login_view(request):
     if request.method == "POST":

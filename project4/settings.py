@@ -72,7 +72,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'project4.wsgi.application'
 
-
+DATABASE_URL = "postgres://kkkgnpgziesidn:ce5a36bfb8251ac7ffa570c7a999bbff4eb415e20567108beae566f466514fb6@ec2-34-252-251-16.eu-west-1.compute.amazonaws.com:5432/defmb85dlh7r93"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -83,6 +83,8 @@ DATABASES = {
         'PORT': 5432,
     }
 }
+
+
 
 AUTH_USER_MODEL = "network.User"
 
@@ -132,6 +134,9 @@ django_heroku.settings(locals())
 # Heroku: Update database configuration from $DATABASE_URL.
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
+
+
+
 
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/

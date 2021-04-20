@@ -30,8 +30,6 @@
         }
     }
     function profileView(username) {
-        // history.pushState({ user: username }, "", username); //TODO move this to the calling function
-        // console.log(`pushed to history ${username}`)
 
         fetch(`users/get/${username}`)
             .then(response => response.json())
@@ -43,8 +41,6 @@
 
     // main view for this web page
     function mainView() {
-        // history.pushState({ view: 'main' }, "", "/");
-        // console.log(`pushed state ${history.state.view}`);
         fetch("/posts")
             .then(response => response.json())
             .then(data => {
@@ -53,6 +49,7 @@
             .catch(e => console.log(e));
     }
 
+    // ui to go back and forth between pages that display posts
     class Paginator extends React.Component {
         constructor(props) {
             super(props)
@@ -261,7 +258,7 @@
                     <div className="text-center m-2">
                         <input id="submit"
                             onClick={() => this.handleOnSubmit()}
-                            className="btn btn-outline-info" type="submit" value="Submit">
+                            className="btn btn-outline-primary" type="submit" value="Submit">
                         </input>
                     </div>
                 </form>
@@ -274,9 +271,9 @@
                 content = loggedIn;
             }
             return (
-                <div className="col-12 col-md-8 border text-center  m-3">
+                <div className="col-12 col-md-8 border border-info text-center  m-3">
 
-                    <h3 className="text-white m-3"><span className="rounded p-2">New Post</span> </h3>
+                    <h3 className="text-white mb-3 mx-3"><span className="rounded p-2 px-3">New Post</span> </h3>
                     <div className="row  justify-content-center pb-2">
                         {content}
                     </div>
@@ -341,6 +338,7 @@
     }
 
 
+    // TODO serve Profile from another file
     class Profile extends React.Component {
         constructor(props) {
             super(props)
@@ -349,41 +347,67 @@
         }
 
         render() {
+
+            let isOwnProfile = this.props.profile.user.username === context.user;
+
+            let followButton;
+
+            if (!isOwnProfile) {
+                followButton = <div className="my-2">
+
+                    <span className="lead m-1"> Click to follow {this.props.profile.user.username}: </span> 
+                     <button className="btn btn-outline-success"> Follow </button>
+                
+                
+                    </div>
+            }
+
             return (
-                <div className="row justify-content-center">
-                    <div className="col-8">
-                        <h3> {this.props.profile.user.username}'s profile </h3>
-                        <hr />
-                        <h5> Following: </h5>
-                        <ul> {this.props.profile.following.map(follower => {
-                            return (
-                                <li className="col" key={follower.id}>
-                                    <a href="" onClick={(e) => {
-                                        e.preventDefault();
-                                        history.pushState({ user: follower.username }, "", follower.username);
-                                        profileView(follower.username)
-                                    }}>
-                                        {follower.username}
-                                    </a>
-                                </li>
-                            )
-                        })}
-                        </ul>
-                        <hr />
-                        <h5> Followers: </h5>
-                        <ul>
-                            {this.props.profile.followers.map(follower => {
+
+                <div>
+                    <div className="py-4 container-fluid top-node">
+                        <div className="py-3 text-center">
+                            <h3> <span className="p-2 px-3 rounded">{this.props.profile.user.username}'s profile</span></h3>
+                        </div>
+                    </div>
+
+                    <div className="text-center">
+                        {followButton}
+                    </div>
+
+                    <div className="row justify-content-center">
+                        <div className="my-4 col-12 col-md-6">
+                            <h5> Following: <span className="lead"> {this.props.profile.following.length} users </span></h5>
+                            <ul> {this.props.profile.following.map(follower => {
                                 return (
-                                    <li className="col" key={follower.id}>
+                                    <li className="px-2" key={follower.id}>
                                         <a href="" onClick={(e) => {
                                             e.preventDefault();
                                             history.pushState({ user: follower.username }, "", follower.username);
-                                        }}
-                                        >{follower.username}</a>
+                                            profileView(follower.username)
+                                        }}>
+                                            {follower.username}
+                                        </a>
                                     </li>
                                 )
                             })}
-                        </ul>
+                            </ul>
+                            <hr />
+                            <h5> Followers: <span className="lead"> {this.props.profile.followers.length} users </span></h5>
+                            <ul>
+                                {this.props.profile.followers.map(follower => {
+                                    return (
+                                        <li className="col" key={follower.id}>
+                                            <a href="" onClick={(e) => {
+                                                e.preventDefault();
+                                                history.pushState({ user: follower.username }, "", follower.username);
+                                            }}
+                                            >{follower.username}</a>
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                        </div>
                     </div>
                 </div>
             )
@@ -403,7 +427,7 @@
             let post = this.props.post;
 
             return (
-                <div key={post.id} className="mx-2 mb-2 p-4 border border-info">
+                <div key={post.id} className="post mx-2 mb-2 p-4 border border-info">
                     <p> <strong>Author: </strong> <a href="" onClick={(e) => {
                         e.preventDefault();
                         history.pushState({ user: post.poster.username }, "", post.poster.username);
@@ -471,31 +495,37 @@
 
             let postsList = posts.map(post => <Post key={post.id} post={post}> </Post>)
             return (
-                <div className="container">
-                    <div className="">
-                        <div className="row justify-content-center">
+
+                <div>
+                    <div className="container-fluid">
+                        <div className="top-node pb-4 pt-4 mb-4 row justify-content-center">
                             <NewPost> </NewPost>
                         </div>
-                        <div className="row justify-content-center">
-                            <h3 className="my-2"> <span className="p-2 rounded">Showing all posts</span> </h3>
-                        </div>
-                        <div className="row justify-content-center my-1">
-                            <div className="col-9 col-md-7">
-                                <div className="row justify-content-center">
+                    </div>
+                    <div className="container">
+                        <div className="">
+
+                            <div className="row justify-content-center">
+                                <h3 className="my-2"> <span className="p-2 px-3 rounded">Showing all posts</span> </h3>
+                            </div>
+                            <div className="row justify-content-center my-1">
+                                <div className="col-9 col-md-7">
+                                    <div className="row justify-content-center">
 
 
-                                    {loadingIcon}
-                                    {this.state.loadingPosts}
+                                        {loadingIcon}
+                                        {this.state.loadingPosts}
+
+                                    </div>
 
                                 </div>
-
                             </div>
-                        </div>
 
-                        <div className="row justify-content-center">
-                            <div className="col-10 col-md-8">
+                            <div className="row justify-content-center">
+                                <div className="col-10 col-md-8">
 
-                                <Paginator data={posts}> </Paginator>
+                                    <Paginator data={posts}> </Paginator>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -506,8 +536,17 @@
 
     }
 
-    history.pushState({view: 'main'}, "", "/");
-    mainView();
-    ReactDOM.render(<Posts posts={[]} />, document.getElementById('root'));
+    if (window.location.pathname === "" || window.location.pathname === "/") {
+        // load main view
+        history.pushState({ view: 'main' }, "", "/");
+        mainView();
+        ReactDOM.render(<Posts posts={[]} />, document.getElementById('root'));
+    } else {
+        // load profile
+        let username = window.location.pathname.substr(1);
+        console.log(username);
+        history.pushState({ username: username }, "", username);
+        profileView(username);
+    }
 </script>
 {% endblock %}
