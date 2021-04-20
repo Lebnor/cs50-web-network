@@ -18,52 +18,51 @@
         user: `{{ user }}`
     }
 
-    class Page extends React.Component {
-        constructor(props) {
-            super(props)
-
-            this.state = {
-                currentPage: 0
-            }
-        }
-
-        render() {
-
-            let display;
-            if (this.props.data) {
-                display = this.props.data.map(item => {
-                    return (
-                        <div>
-                            {item}
-                        </div>
-                    )
-                })
-            }
-            return (
-                <div>
-                </div>
-            )
-        }
+    function updateHistory() {
+        console.log(`Update history`);
     }
 
+    window.onpopstate = function (event) {
+        if (event.state.user) {
+            profileView(event.state.user);
+        } else if (event.state.view) {
+            mainView();
+        }
+    }
+    function profileView(username) {
+        // history.pushState({ user: username }, "", username); //TODO move this to the calling function
+        // console.log(`pushed to history ${username}`)
+
+        fetch(`users/get/${username}`)
+            .then(response => response.json())
+            .then(data => {
+                ReactDOM.render(<Profile profile={data} />, document.getElementById('root'));
+            })
+            .catch(e => console.log(e))
+    }
+
+    // main view for this web page
+    function mainView() {
+        // history.pushState({ view: 'main' }, "", "/");
+        // console.log(`pushed state ${history.state.view}`);
+        fetch("/posts")
+            .then(response => response.json())
+            .then(data => {
+                ReactDOM.render(<Posts posts={data} loading={false} />, document.getElementById('root'));
+            })
+            .catch(e => console.log(e));
+    }
 
     class Paginator extends React.Component {
         constructor(props) {
             super(props)
 
             this.state = {
-                pages: [],
                 currentPage: 0
             }
         }
-        fillPages() {
-
-        }
 
         updatePageCounter(increment) {
-            if (!this.state.currentPage) {
-                this.state.currentPage = 0;
-            }
 
             this.setState({
                 currentPage: this.state.currentPage + increment
@@ -77,6 +76,20 @@
             return pageIndex <= 0 ? "page-item disabled" : "page-item";
         }
 
+        reload() {
+            fetch("/posts")
+                .then(response => response.json())
+                .then(data => {
+                    this.setState({
+                        data: data,
+                        loading: false
+                    })
+                })
+                .catch(() => {
+
+                })
+
+        }
         render() {
             // empty props, nothing to show
             if (this.props.data.length === 0) {
@@ -85,17 +98,19 @@
                 )
             }
 
+            let data = this.state.data ? this.state.data : this.props.data;
+
             let pagesCounter = 0;
             let pages = [];
             let page = [];
-            for (let i = 0; i < this.props.data.length; i++) {
-                if ((i % 9 === 0 && i !== 0) || i === this.props.data.length - 1) {
-                    page.push(this.props.data[i]);
+            for (let i = 0; i < data.length; i++) {
+                if ((i % 9 === 0 && i !== 0) || i === data.length - 1) {
+                    page.push(data[i]);
                     pages[pagesCounter] = page;
                     pagesCounter++;
                     page = [];
                 } else {
-                    page.push(this.props.data[i]);
+                    page.push(data[i]);
                 }
             }
 
@@ -103,13 +118,19 @@
             page = pages[pageIndex];
 
 
-            const previousButton = <li className={this.prevClassName(pageIndex, pages.length)}><a className="page-link" href="#"
-                onClick={() => this.updatePageCounter(-1)}
+            const previousButton = <li className={this.prevClassName(pageIndex, pages.length)}><a className="page-link" href=""
+                onClick={(e) => {
+                    e.preventDefault();
+                    this.updatePageCounter(-1)
+                }}
             >Previous</a>
             </li>;
 
-            const nextButton = <li className={this.nextClassName(pageIndex, pages.length)}><a className="page-link" href="#"
-                onClick={() => this.updatePageCounter(1)}
+            const nextButton = <li className={this.nextClassName(pageIndex, pages.length)}><a className="page-link" href=""
+                onClick={(e) => {
+                    e.preventDefault();
+                    this.updatePageCounter(1)
+                }}
             >Next</a>
             </li>;
 
@@ -117,27 +138,38 @@
 
                 <div className="">
                     <div className="row justify-content-between px-4">
-                            <h3 > Page {pageIndex + 1} </h3>
-                            <nav className="align-self-center" aria-label="Page navigation">
-                                <ul className="pagination">
-                                    {previousButton}
-                                    {pages.map((page, index) => {
-                                        return (
-                                            <li key={index} className="page-item">
-                                                <a className="page-link" href="#"
-                                                    onClick={() => {
-                                                        this.setState({
-                                                            currentPage: index
-                                                        })
-                                                    }}> {index + 1} </a>
-                                            </li>
-                                        )
-                                    })}
-                                    {nextButton}
-                                </ul>
-                            </nav>
-                            <button className="align-self-start btn btn-primary"> Reload posts </button>
+                        <h3 > Page {pageIndex + 1} </h3>
+                        <nav className="align-self-center" aria-label="Page navigation">
+                            <ul className="pagination">
+                                {previousButton}
+                                {pages.map((page, index) => {
+                                    return (
+                                        <li key={index} className="page-item">
+                                            <a className="page-link" href=""
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    this.setState({
+                                                        currentPage: index
+                                                    })
+                                                }}> {index + 1} </a>
+                                        </li>
+                                    )
+                                })}
+                                {nextButton}
+                            </ul>
+                        </nav>
+                        <button className="align-self-start btn btn-primary"
+                            onClick={() => {
+                                this.reload()
+                                this.setState({
+                                    loading: <Load message={'Reloading content...'}> </Load>
+                                })
+                            }
+                            }
+                        > Reload posts </button>
                     </div>
+                    {this.state.loading}
+
                     {page.map((post, index) => {
                         return (
                             <div key={post.id}>
@@ -151,8 +183,9 @@
                             {pages.map((page, index) => {
                                 return (
                                     <li key={index} className="page-item">
-                                        <a className="page-link" href="#"
-                                            onClick={() => {
+                                        <a className="page-link" href=""
+                                            onClick={(e) => {
+                                                e.preventDefault();
                                                 this.setState({
                                                     currentPage: index
                                                 })
@@ -210,9 +243,6 @@
                 )
                 .catch();
 
-
-
-
         }
         render() {
             var notLoggedIn = <p className="text-danger">Please
@@ -220,7 +250,7 @@
                  or
                  <a href="{% url 'register' %}"> Register </a>
                   to make a new post.</p>
-            var loggedIn = <div className="col-8">
+            var loggedIn = <div className="col-12 col-md-8">
                 <form>
                     <textarea required
                         onKeyDown={() => this.handleKeyDown()}
@@ -244,7 +274,7 @@
                 content = loggedIn;
             }
             return (
-                <div className="col-8 border text-center  m-3">
+                <div className="col-12 col-md-8 border text-center  m-3">
 
                     <h3 className="text-white m-3"><span className="rounded p-2">New Post</span> </h3>
                     <div className="row  justify-content-center pb-2">
@@ -310,6 +340,56 @@
         }
     }
 
+
+    class Profile extends React.Component {
+        constructor(props) {
+            super(props)
+
+            console.log(this.props.profile);
+        }
+
+        render() {
+            return (
+                <div className="row justify-content-center">
+                    <div className="col-8">
+                        <h3> {this.props.profile.user.username}'s profile </h3>
+                        <hr />
+                        <h5> Following: </h5>
+                        <ul> {this.props.profile.following.map(follower => {
+                            return (
+                                <li className="col" key={follower.id}>
+                                    <a href="" onClick={(e) => {
+                                        e.preventDefault();
+                                        history.pushState({ user: follower.username }, "", follower.username);
+                                        profileView(follower.username)
+                                    }}>
+                                        {follower.username}
+                                    </a>
+                                </li>
+                            )
+                        })}
+                        </ul>
+                        <hr />
+                        <h5> Followers: </h5>
+                        <ul>
+                            {this.props.profile.followers.map(follower => {
+                                return (
+                                    <li className="col" key={follower.id}>
+                                        <a href="" onClick={(e) => {
+                                            e.preventDefault();
+                                            history.pushState({ user: follower.username }, "", follower.username);
+                                        }}
+                                        >{follower.username}</a>
+                                    </li>
+                                )
+                            })}
+                        </ul>
+                    </div>
+                </div>
+            )
+        }
+    }
+
     // receives as props a json object representing a post
     class Post extends React.Component {
         constructor(props) {
@@ -317,14 +397,18 @@
         }
 
         handleOnClick(id) {
-            ReactDOM.render(<Post post={this.props.post} />, document.getElementById('root'));
+            profileView(id);
         }
         render() {
             let post = this.props.post;
 
             return (
                 <div key={post.id} className="mx-2 mb-2 p-4 border border-info">
-                    <p> <strong>Author: </strong> <a href="#" onClick={() => this.handleOnClick(post.poster.id)}>{post.poster.username} </a></p>
+                    <p> <strong>Author: </strong> <a href="" onClick={(e) => {
+                        e.preventDefault();
+                        history.pushState({ user: post.poster.username }, "", post.poster.username);
+                        this.handleOnClick(post.poster.username);
+                    }}>{post.poster.username} </a></p>
                     <p> <strong>Body: </strong> {post.text}</p>
                     <p> <strong>Likes: </strong> {post.likes}</p>
                     <p> <strong>Date: </strong> {post.timestamp} </p>
@@ -398,15 +482,7 @@
                         <div className="row justify-content-center my-1">
                             <div className="col-9 col-md-7">
                                 <div className="row justify-content-center">
-                                    <button className="mx-4 text-white btn m-0" onClick={() => {
-                                        this.showPosts()
-                                        this.setState({
-                                            loadingPosts: <Load className="align-self-center" message={'Loading posts...'}> </Load>
-                                        })
 
-                                    }
-                                    }>Reload posts
-                                    </button>
 
                                     {loadingIcon}
                                     {this.state.loadingPosts}
@@ -430,11 +506,8 @@
 
     }
 
-    fetch("/posts")
-        .then(response => response.json())
-        .then(data => {
-            ReactDOM.render(<Posts posts={data} loading={false} />, document.getElementById('root'));
-        });
+    history.pushState({view: 'main'}, "", "/");
+    mainView();
     ReactDOM.render(<Posts posts={[]} />, document.getElementById('root'));
 </script>
 {% endblock %}

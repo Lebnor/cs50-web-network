@@ -7,7 +7,7 @@ from django.core import serializers
 from django.core.paginator import Paginator
 from datetime import datetime
 
-from .models import User, Comment, Post
+from .models import User, Comment, Post, Profile
 import json
 
 
@@ -67,6 +67,14 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+
+def get_user(request, username):
+    user = User.objects.get(username=username)
+    profile = Profile.objects.get(user=user)
+    jsonProfile = profile.serialize()
+    print(jsonProfile)
+    return JsonResponse(jsonProfile)
 
 
 def posts(request):
