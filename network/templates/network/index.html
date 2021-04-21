@@ -34,7 +34,7 @@
         fetch(`users/get/${username}`)
             .then(response => response.json())
             .then(data => {
-                ReactDOM.render(<Profile profile={data} />, document.getElementById('root'));
+                ReactDOM.render(<Profile profile={data} filter={''} />, document.getElementById('root'));
             })
             .catch(e => console.log(e))
     }
@@ -57,6 +57,8 @@
             this.state = {
                 currentPage: 0
             }
+
+            this.reload();
         }
 
         updatePageCounter(increment) {
@@ -74,7 +76,7 @@
         }
 
         reload() {
-            fetch("/posts")
+            fetch(`/posts/${this.props.filter}`)
                 .then(response => response.json())
                 .then(data => {
                     this.setState({
@@ -174,25 +176,27 @@
                             </div>
                         )
                     })}
-                    <nav aria-label="Page navigation">
-                        <ul className="pagination">
-                            {previousButton}
-                            {pages.map((page, index) => {
-                                return (
-                                    <li key={index} className="page-item">
-                                        <a className="page-link" href=""
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                this.setState({
-                                                    currentPage: index
-                                                })
-                                            }}> {index + 1} </a>
-                                    </li>
-                                )
-                            })}
-                            {nextButton}
-                        </ul>
-                    </nav>
+                    <div className="row justify-content-center">
+                        <nav aria-label="Page navigation">
+                            <ul className="pagination">
+                                {previousButton}
+                                {pages.map((page, index) => {
+                                    return (
+                                        <li key={index} className="page-item">
+                                            <a className="page-link" href=""
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    this.setState({
+                                                        currentPage: index
+                                                    })
+                                                }}> {index + 1} </a>
+                                        </li>
+                                    )
+                                })}
+                                {nextButton}
+                            </ul>
+                        </nav>
+                    </div>
                 </div>
 
             )
@@ -342,24 +346,85 @@
     class Profile extends React.Component {
         constructor(props) {
             super(props)
-
-            console.log(this.props.profile);
+            this.state = {
+                profile: this.props.profile,
+                loading: false
+            }
         }
 
+        isInFollowing() {
+            let profile = this.state.profile;
+            for (let i = 0; i < profile.followers.length; i++) {
+                if (profile.followers[i].username === context.user) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        handleFollow(username) {
+            this.setState({
+                loading: <Load></Load>
+            })
+            fetch(`users/follow/${username}`)
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result)
+                    this.setState({
+                        profile: result.profile,
+                        loading: false
+                    })
+                })
+        }
+
+        handleUnfollow(username) {
+            this.setState({
+                loading: <Load> </Load>
+            })
+            fetch(`users/unfollow/${username}`)
+                .then(response => response.json())
+                .then(result => {
+                    console.log(result)
+                    this.setState({
+                        profile: result.profile,
+                        loading: false
+                    })
+                })
+        }
+
+        showPostsForUser() {
+
+            fetch(`posts/${this.props.profile.user.username}`)
+                .then(response => response.json())
+                .then(data => {
+                    return (
+                        <Paginator data={data}> </Paginator>
+                    )
+                })
+        }
         render() {
 
-            let isOwnProfile = this.props.profile.user.username === context.user;
 
+            let isInFollowing = this.isInFollowing();
+            let isOwnProfile = this.props.profile.user.username === context.user;
             let followButton;
 
             if (!isOwnProfile) {
-                followButton = <div className="my-2">
-
-                    <span className="lead m-1"> Click to follow {this.props.profile.user.username}: </span> 
-                     <button className="btn btn-outline-success"> Follow </button>
-                
-                
+                if (isInFollowing) {
+                    // create button to unfollow
+                    followButton = <div className="my-2">
+                        <span className="lead m-1"> Click to unfollow {this.props.profile.user.username}: </span>
+                        <button onClick={() => this.handleUnfollow(this.props.profile.user.username)} className="btn btn-outline-danger">{this.state.loading ? this.state.loading : 'Unfollow'} </button>
                     </div>
+                } else {
+                    // create button to follow
+                    followButton = <div className="my-2">
+                        <span className="lead m-1"> Click to follow {this.props.profile.user.username}: </span>
+                        <button onClick={() => this.handleFollow(this.props.profile.user.username)} className="btn btn-outline-success">{this.state.loading ? this.state.loading : 'Follow'} </button>
+                    </div>
+                }
+
             }
 
             return (
@@ -371,8 +436,10 @@
                         </div>
                     </div>
 
-                    <div className="text-center">
-                        {followButton}
+                    <div className="row justify-content-center">
+                        <div className="col-auto">
+                            {followButton}
+                        </div>
                     </div>
 
                     <div className="row justify-content-center">
@@ -401,6 +468,7 @@
                                             <a href="" onClick={(e) => {
                                                 e.preventDefault();
                                                 history.pushState({ user: follower.username }, "", follower.username);
+                                                profileView(follower.username);
                                             }}
                                             >{follower.username}</a>
                                         </li>
@@ -408,6 +476,13 @@
                                 })}
                             </ul>
                         </div>
+
+                    </div>
+
+                    <div className="row justify-content-center">
+                        <hr />
+
+                        {this.showPostsForUser()}
                     </div>
                 </div>
             )
@@ -544,7 +619,6 @@
     } else {
         // load profile
         let username = window.location.pathname.substr(1);
-        console.log(username);
         history.pushState({ username: username }, "", username);
         profileView(username);
     }

@@ -72,18 +72,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'project4.wsgi.application'
 
-DATABASE_URL = "postgres://kkkgnpgziesidn:ce5a36bfb8251ac7ffa570c7a999bbff4eb415e20567108beae566f466514fb6@ec2-34-252-251-16.eu-west-1.compute.amazonaws.com:5432/defmb85dlh7r93"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'defmb85dlh7r93',
-        'USER': 'kkkgnpgziesidn',
-        'PASSWORD': 'ce5a36bfb8251ac7ffa570c7a999bbff4eb415e20567108beae566f466514fb6',
-        'HOST': 'ec2-34-252-251-16.eu-west-1.compute.amazonaws.com',
+        'NAME': 'd6qaab6vedckhq',
+        'USER': 'nzwncoauklxhmf',
+        'PASSWORD': '4277532daba79b644e6bfc8a623d3c78cd5cfb858696542887e03f518d974001',
+        'HOST': 'ec2-34-254-120-2.eu-west-1.compute.amazonaws.com',
         'PORT': 5432,
     }
 }
-
 
 
 AUTH_USER_MODEL = "network.User"
