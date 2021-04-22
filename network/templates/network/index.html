@@ -14,6 +14,7 @@
 
 <script type="text/babel">
 
+
     var context = {
         user: `{{ user }}`
     }
@@ -70,7 +71,9 @@
             return (
                 <div className="row justify-content-center py-4">
                     <div className="col-12 col-sm-8">
-                        <Header headline={'Posts from users you follow'} />
+                        <div className="text-center">
+                            <Header headline={'Posts from users you follow'} />
+                        </div>
                         <Paginator data={this.props.data} filter={`posts/following`} />
                     </div>
                 </div>
@@ -663,7 +666,7 @@
     class Header extends React.Component {
         render() {
             return (
-                <h3 className="shadow-sm text-white mb-3 mx-3"><span className="rounded p-2 px-3"> {this.props.headline} </span> </h3>
+                <h3 className="text-white mb-3 mx-3"><span className="shadow-sm rounded p-2 px-3"> {this.props.headline} </span> </h3>
             )
         }
 
