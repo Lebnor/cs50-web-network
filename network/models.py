@@ -48,8 +48,9 @@ class Post(models.Model):
         User, on_delete=models.CASCADE, related_name="posts", null=True, blank=True)
     text = models.TextField()
     timestamp = models.DateTimeField(default=datetime.now)
-    likes = models.PositiveIntegerField(default=0)
-
+    likes = models.PositiveIntegerField(default=0, blank=True, null=True)
+    likeCount = models.ManyToManyField(User)
+    
     def serialize(self):
         return {
             "id": self.pk,
@@ -65,6 +66,16 @@ class Post(models.Model):
     def __str__(self):
         return f'{self.id}: {self.poster.username}'
 
+class Like(models.Model):
+    user = models.ForeignKey(User, related_name="liked", on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name="like", on_delete=models.CASCADE)
+
+    def serialize(self):
+        return {
+            'user': self.user.serialize(),
+            'post': self.post.serialize()
+        }
+    
 
 class Comment(models.Model):
     text = models.TextField()

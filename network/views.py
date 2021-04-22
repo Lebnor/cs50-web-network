@@ -6,14 +6,22 @@ from django.urls import reverse
 from django.core import serializers
 from django.core.paginator import Paginator
 from datetime import datetime
+from django.utils.safestring import SafeString
 
-from .models import User, Comment, Post, Profile
+from .models import User, Comment, Post, Profile, Like
 import json
 
 
 def index(request):
+    likes = Like.objects.filter(user=request.user).order_by('post_id').all()
+    likesJson = []
+    for like in likes:
+        likesJson.append(like.serialize())
+
+
     return render(request, "network/index.html", {
-        'user': request.user
+        'user': request.user,
+        'likes': SafeString(likesJson)
     })
 
 
@@ -98,9 +106,10 @@ def get_user(request, username):
     for post in postsForUser:
         jsonPostsForUser.append(post.serialize())
 
+
     response = {
         'profile': jsonProfile,
-        'postsForUser': jsonPostsForUser
+        'postsForUser': jsonPostsForUser,
     }
     return JsonResponse(response)
 
@@ -109,6 +118,7 @@ def posts(request):
     # sort posts by reverse chronological order
     inList = []
     posts = Post.objects.order_by('-timestamp').all()
+
 
     for post in posts:
         inList.append(post.serialize())

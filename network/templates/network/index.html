@@ -16,9 +16,11 @@
 
 
     var context = {
-        user: `{{ user }}`
+        user: `{{ user }}`,
+        likes: `{{ likes }}`
     }
 
+    console.log(context.likes);
 
     window.onpopstate = function (event) {
         if (event.state.user) {
@@ -612,11 +614,12 @@
                 editButton =
                     <button className="btn btn-link" onClick={() => this.handleEditButton()}>
 
-                        Edit
+                        <i className="bi bi-pencil-square"></i> Edit
 
                     </button>
             }
 
+            
             let postBody = null;
             if (this.state.editMode) {
 
@@ -633,8 +636,8 @@
                             </div>
                             <div className="row justify-content-end">
                                 <div className="col-auto">
-                                    <button onClick={() => this.handleSave()} className="btn btn-outline-success"> {this.state.loading || 'save'} </button>
-                                    <button onClick={() => this.handleCancel()} className="m-2 btn btn-danger"> cancel </button>
+                                    <button onClick={() => this.handleSave()} className="btn btn-outline-success"> {this.state.loading || (<span className="bi bi-check-circle"> save</span> )} </button>
+                                    <button onClick={() => this.handleCancel()} className="m-2 btn btn-danger"><i className="bi bi-x-circle"></i> cancel </button>
                                 </div>
                             </div>
                         </div>
@@ -644,6 +647,16 @@
                 postBody = <p> <strong>Body: </strong> {this.state.text}</p>
 
             }
+
+
+            // TODO binary search to determined if user liked this post
+            let isLikes = null;
+            for (let i = 0; i < context.likes.length; i++) {
+                if (post.id == context.likes[i].id){
+                    isLikes = <div>You liked this post</div>;
+                }
+            }
+
 
             return (
                 <div key={post.id} className="shadow post mx-2 mb-2 p-4 border border-info">
@@ -657,8 +670,9 @@
                     }}>{post.poster.username} </a>
                     </p>
                     {postBody}
-                    <p> <strong>Likes: </strong> {post.likes}</p>
+                    <p> <i className="bi bi-heart text-danger"></i> {post.likes} {isLikes}</p>
                     <p> <strong>Date: </strong> {post.timestamp} </p>
+
                 </div>
             )
         }
