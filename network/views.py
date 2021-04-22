@@ -82,7 +82,16 @@ def get_user(request, username):
     user = User.objects.get(username=username)
     profile = Profile.objects.get(user=user)
     jsonProfile = profile.serialize()
-    return JsonResponse(jsonProfile)
+    postsForUser = Post.objects.filter(poster=user).order_by('-timestamp').all()
+    jsonPostsForUser = []
+    for post in postsForUser:
+        jsonPostsForUser.append(post.serialize())
+
+    response = {
+        'profile': jsonProfile,
+        'postsForUser': jsonPostsForUser
+    }
+    return JsonResponse(response)
 
 
 def posts(request):

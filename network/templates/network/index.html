@@ -18,9 +18,6 @@
         user: `{{ user }}`
     }
 
-    function updateHistory() {
-        console.log(`Update history`);
-    }
 
     window.onpopstate = function (event) {
         if (event.state.user) {
@@ -29,12 +26,13 @@
             mainView();
         }
     }
+
     function profileView(username) {
 
         fetch(`users/get/${username}`)
             .then(response => response.json())
             .then(data => {
-                ReactDOM.render(<Profile profile={data} filter={''} />, document.getElementById('root'));
+                ReactDOM.render(<Profile postsForUser={data.postsForUser} profile={data.profile} filter={username} refresh={true} />, document.getElementById('root'));
             })
             .catch(e => console.log(e))
     }
@@ -76,7 +74,9 @@
         }
 
         reload() {
-            fetch(`/posts/${this.props.filter}`)
+
+            let searchTerm = this.props.filter ? `/${this.props.filter}` : '';
+            fetch(`posts${searchTerm}`)
                 .then(response => response.json())
                 .then(data => {
                     this.setState({
@@ -85,19 +85,23 @@
                     })
                 })
                 .catch(() => {
-
+                    this.setState({
+                        loading: false
+                    })
                 })
 
         }
         render() {
+
             // empty props, nothing to show
-            if (this.props.data.length === 0) {
+            if (this.props.data.length === 0 && this.state.data && this.state.data.length === 0) {
                 return (
                     <div></div>
                 )
             }
 
             let data = this.state.data ? this.state.data : this.props.data;
+
 
             let pagesCounter = 0;
             let pages = [];
@@ -116,6 +120,8 @@
             let pageIndex = this.state.currentPage ? this.state.currentPage : 0;
             page = pages[pageIndex];
 
+            if (!page)
+                return <span> </span>
 
             const previousButton = <li className={this.prevClassName(pageIndex, pages.length)}><a className="page-link" href=""
                 onClick={(e) => {
@@ -232,9 +238,6 @@
 
 
         handleOnSubmit() {
-            console.log('onsubmit')
-            console.log(this.state.textAreaValue)
-            // TODO add some checks
             fetch("posts/create/" + this.state.textAreaValue)
                 .then(response => response.json())
                 .then(data =>
@@ -348,9 +351,11 @@
             super(props)
             this.state = {
                 profile: this.props.profile,
-                loading: false
+                loading: false,
             }
+
         }
+       
 
         isInFollowing() {
             let profile = this.state.profile;
@@ -370,7 +375,6 @@
             fetch(`users/follow/${username}`)
                 .then(response => response.json())
                 .then(result => {
-                    console.log(result)
                     this.setState({
                         profile: result.profile,
                         loading: false
@@ -385,27 +389,23 @@
             fetch(`users/unfollow/${username}`)
                 .then(response => response.json())
                 .then(result => {
-                    console.log(result)
                     this.setState({
                         profile: result.profile,
                         loading: false
                     })
                 })
-        }
-
-        showPostsForUser() {
-
-            fetch(`posts/${this.props.profile.user.username}`)
-                .then(response => response.json())
-                .then(data => {
-                    return (
-                        <Paginator data={data}> </Paginator>
-                    )
+                .catch(e => {
+                    console.log(e)
+                    this.setState({
+                        loading: false
+                    })
                 })
+
+
         }
+
         render() {
-
-
+            
             let isInFollowing = this.isInFollowing();
             let isOwnProfile = this.props.profile.user.username === context.user;
             let followButton;
@@ -427,6 +427,18 @@
 
             }
 
+            let postsForUser = <span> </span>
+                postsForUser =
+                    <div>
+                        {this.props.postsForUser.map(post => {
+                            return (
+                                <div key={post.id}>
+                                    <Post post={post}> </Post>
+                                </div>
+                            )
+                        })
+                        }
+                    </div>
             return (
 
                 <div>
@@ -451,6 +463,9 @@
                                         <a href="" onClick={(e) => {
                                             e.preventDefault();
                                             history.pushState({ user: follower.username }, "", follower.username);
+                                            this.setState({
+                                                refreshData: true
+                                            })
                                             profileView(follower.username)
                                         }}>
                                             {follower.username}
@@ -480,13 +495,15 @@
                     </div>
 
                     <div className="row justify-content-center">
-                        <hr />
-
-                        {this.showPostsForUser()}
+                        <div className="col-12 col-sm-8">
+                            <Paginator key={this.props.profile.user.username} data={this.props.postsForUser} filter={this.props.profile.user.username}> </Paginator>
+                        </div>
                     </div>
                 </div>
             )
         }
+
+
     }
 
     // receives as props a json object representing a post
@@ -495,8 +512,8 @@
             super(props)
         }
 
-        handleOnClick(id) {
-            profileView(id);
+        handleOnClick(username) {
+            profileView(username);
         }
         render() {
             let post = this.props.post;
@@ -623,4 +640,5 @@
         profileView(username);
     }
 </script>
+
 {% endblock %}
