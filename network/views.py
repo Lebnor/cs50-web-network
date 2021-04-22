@@ -151,6 +151,16 @@ def dislike(request, id):
     post.save()
 
 
+def edit(request, id, content):
+    post = Post.objects.get(id=id)
+    post.text = content
+    post.save()
+    print(post)
+    return JsonResponse({
+        'message': 'Succesfully edited',
+        'post': post.serialize()
+        })
+
 def follow(request, username):
     try:
         user = Profile.objects.get(user=request.user)

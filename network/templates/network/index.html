@@ -70,7 +70,7 @@
             return (
                 <div className="row justify-content-center py-4">
                     <div className="col-12 col-sm-8">
-                        <Header headline={'Posts from users you follow'}/>
+                        <Header headline={'Posts from users you follow'} />
                         <Paginator data={this.props.data} filter={`posts/following`} />
                     </div>
                 </div>
@@ -202,7 +202,7 @@
                                 })
                             }
                             }
-                        > Reload posts </button>
+                        > Reload </button>
                     </div>
                     {this.state.loading}
 
@@ -324,7 +324,7 @@
     class Load extends React.Component {
         render() {
             return (
-                <div className="row justify-content-center">
+                <div className="row justify-content-center mb-2">
                     <p className="loader mx-2"> </p>
                     {this.props.message}
                 </div>
@@ -394,7 +394,7 @@
             let profile = this.state.profile;
             for (let i = 0; i < profile.followers.length; i++) {
                 console.log(profile.followers[i])
-                
+
                 if (profile.followers[i].username === context.user) {
                     return true;
                 }
@@ -547,22 +547,113 @@
     class Post extends React.Component {
         constructor(props) {
             super(props)
+            this.state = {
+                editMode: false,
+                text: this.props.post.text,
+                value: this.props.post.text,
+                loading: false
+            }
         }
 
         handleOnClick(username) {
             profileView(username);
         }
+
+        handleEditButton() {
+            this.setState({
+                editMode: true
+            })
+        }
+
+
+        closeEditMode() {
+            document.getElementById(`edit${this.props.post.id}`).style.animationPlayState = 'running';
+            document.getElementById(`edit${this.props.post.id}`).onanimationend = () => {
+                this.setState({
+                    editMode: false,
+                    loading: false
+                })
+
+            }
+        }
+        handleCancel() {
+            this.closeEditMode();
+        }
+
+        handleSave() {
+            this.setState({
+                loading: <Load />
+            })
+            let id = this.props.post.id
+            let content = this.state.value;
+            fetch(`posts/edit/${id}/${content}`)
+                .then(response => response.json())
+                .then(result => {
+                    this.setState({
+                        text: result.post.text
+                    })
+                    this.closeEditMode();
+                })
+        }
+        handleOnChange(event) {
+            this.setState({
+                value: event.target.value
+            })
+        }
         render() {
             let post = this.props.post;
 
+            let isOwnPost = this.props.post.poster.username == context.user;
+            let editButton = null;
+            if (isOwnPost) {
+                editButton =
+                    <button className="btn btn-link" onClick={() => this.handleEditButton()}>
+
+                        Edit
+
+                    </button>
+            }
+
+            let postBody = null;
+            if (this.state.editMode) {
+
+                postBody =
+                    <div id={`edit${post.id}`} className="appear disappear shadow-sm w-100 border">
+
+                        <h5 className="text-warning mx-4 p-2 text-center"> Edit mode </h5>
+                        <div>
+                            <div className="row justify-content-center">
+                                <div className="col mx-1">
+                                    <textarea className="form-control" onChange={(e) => this.handleOnChange(e)} defaultValue={post.text} />
+                                </div>
+
+                            </div>
+                            <div className="row justify-content-end">
+                                <div className="col-auto">
+                                    <button onClick={() => this.handleSave()} className="btn btn-outline-success"> {this.state.loading || 'save'} </button>
+                                    <button onClick={() => this.handleCancel()} className="m-2 btn btn-danger"> cancel </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+            } else {
+                postBody = <p> <strong>Body: </strong> {this.state.text}</p>
+
+            }
+
             return (
-                <div key={post.id} className="post mx-2 mb-2 p-4 border border-info">
+                <div key={post.id} className="shadow post mx-2 mb-2 p-4 border border-info">
+                    <div className="text-center">
+                        {editButton}
+                    </div>
                     <p> <strong>Author: </strong> <a href="" onClick={(e) => {
                         e.preventDefault();
                         history.pushState({ user: post.poster.username }, "", `users/${post.poster.username}`);
                         this.handleOnClick(post.poster.username);
-                    }}>{post.poster.username} </a></p>
-                    <p> <strong>Body: </strong> {post.text}</p>
+                    }}>{post.poster.username} </a>
+                    </p>
+                    {postBody}
                     <p> <strong>Likes: </strong> {post.likes}</p>
                     <p> <strong>Date: </strong> {post.timestamp} </p>
                 </div>
@@ -571,12 +662,12 @@
     }
     class Header extends React.Component {
         render() {
-            return(
-                <h3 className="text-white mb-3 mx-3"><span className="rounded p-2 px-3"> {this.props.headline} </span> </h3>
+            return (
+                <h3 className="shadow-sm text-white mb-3 mx-3"><span className="rounded p-2 px-3"> {this.props.headline} </span> </h3>
             )
         }
 
-        
+
     }
     class Posts extends React.Component {
         constructor(props) {
@@ -618,7 +709,7 @@
 
             // read posts from props or update it from state
             let posts = this.state.posts ? this.state.posts : this.props.posts;
-            
+
             let loadingIcon = <Load message={'loading...'}> </Load>
             if (this.props.loading === false) {
                 loadingIcon = <span> </span>
