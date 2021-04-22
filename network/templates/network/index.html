@@ -30,7 +30,12 @@
     }
 
     function followView() {
-        // todo
+        fetch("posts/following")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                ReactDOM.render(<FollowingView data={data} />, document.getElementById('root'));
+            })
     }
 
     function profileView(username) {
@@ -53,6 +58,25 @@
             .catch(e => console.log(e));
     }
 
+    class FollowingView extends React.Component {
+        constructor(props) {
+            super(props)
+            this.state = {
+
+            }
+        }
+
+        render() {
+            return (
+                <div className="row justify-content-center py-4">
+                    <div className="col-12 col-sm-8">
+                        <Header headline={'Posts from users you follow'}/>
+                        <Paginator data={this.props.data} filter={`posts/following`} />
+                    </div>
+                </div>
+            )
+        }
+    }
     // ui to go back and forth between pages that display posts
     class Paginator extends React.Component {
         constructor(props) {
@@ -81,9 +105,9 @@
 
         reload() {
 
-            let searchTerm = this.props.filter ? `/${this.props.filter}` : '';
+            let searchTerm = this.props.filter ? this.props.filter : '';
             console.log(searchTerm)
-            fetch(`/posts${searchTerm}`)
+            fetch(searchTerm)
                 .then(response => response.json())
                 .then(data => {
                     this.setState({
@@ -296,6 +320,7 @@
         }
     }
 
+
     class Load extends React.Component {
         render() {
             return (
@@ -362,7 +387,7 @@
             }
 
         }
-       
+
 
         isInFollowing() {
             let profile = this.state.profile;
@@ -412,7 +437,7 @@
         }
 
         render() {
-            
+
             let isInFollowing = this.isInFollowing();
             let isOwnProfile = this.props.profile.user.username === context.user;
             let followButton;
@@ -435,17 +460,17 @@
             }
 
             let postsForUser = <span> </span>
-                postsForUser =
-                    <div>
-                        {this.props.postsForUser.map(post => {
-                            return (
-                                <div key={post.id}>
-                                    <Post post={post}> </Post>
-                                </div>
-                            )
-                        })
-                        }
-                    </div>
+            postsForUser =
+                <div>
+                    {this.props.postsForUser.map(post => {
+                        return (
+                            <div key={post.id}>
+                                <Post post={post}> </Post>
+                            </div>
+                        )
+                    })
+                    }
+                </div>
             return (
 
                 <div>
@@ -503,7 +528,7 @@
 
                     <div className="row justify-content-center">
                         <div className="col-12 col-sm-8">
-                            <Paginator key={this.props.profile.user.username} data={this.props.postsForUser} filter={this.props.profile.user.username}> </Paginator>
+                            <Paginator key={this.props.profile.user.username} data={this.props.postsForUser} filter={`posts/${this.props.profile.user.username}`}> </Paginator>
                         </div>
                     </div>
                 </div>
@@ -539,7 +564,15 @@
             )
         }
     }
+    class Header extends React.Component {
+        render() {
+            return(
+                <h3 className="text-white mb-3 mx-3"><span className="rounded p-2 px-3"> {this.props.headline} </span> </h3>
+            )
+        }
 
+        
+    }
     class Posts extends React.Component {
         constructor(props) {
             super(props);
@@ -579,14 +612,8 @@
         render() {
 
             // read posts from props or update it from state
-            let posts;
-            if (this.state.posts) {
-                posts = this.state.posts;
-            } else {
-                posts = this.props.posts;
-            }
-
-
+            let posts = this.state.posts ? this.state.posts : this.props.posts;
+            
             let loadingIcon = <Load message={'loading...'}> </Load>
             if (this.props.loading === false) {
                 loadingIcon = <span> </span>
@@ -605,16 +632,14 @@
                         <div className="">
 
                             <div className="row justify-content-center">
-                                <h3 className="my-2"> <span className="p-2 px-3 rounded">Showing all posts</span> </h3>
+                                <Header headline={'Showing all posts'} />
                             </div>
                             <div className="row justify-content-center my-1">
                                 <div className="col-9 col-md-7">
                                     <div className="row justify-content-center">
 
-
                                         {loadingIcon}
                                         {this.state.loadingPosts}
-
                                     </div>
 
                                 </div>
@@ -622,8 +647,7 @@
 
                             <div className="row justify-content-center">
                                 <div className="col-10 col-md-8">
-
-                                    <Paginator data={posts}> </Paginator>
+                                    <Paginator data={posts} filter={''}> </Paginator>
                                 </div>
                             </div>
                         </div>
@@ -641,8 +665,8 @@
         history.pushState({ view: 'main' }, "", "/");
         mainView();
         ReactDOM.render(<Posts posts={[]} />, document.getElementById('root'));
-    } else if (window.location.pathname === "/follow"){
-        history.pushState( {view: 'follow'}, "", "follow");
+    } else if (window.location.pathname === "/follow") {
+        history.pushState({ view: 'follow' }, "", "follow");
         followView();
     } else {
         // load profile

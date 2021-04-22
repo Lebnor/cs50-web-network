@@ -78,11 +78,22 @@ def register(request):
         return render(request, "network/register.html")
 
 
+def get_posts_following(request):
+    user = request.user
+    userProfile = Profile.objects.get(user=user)
+    following = list(userProfile.following.all())
+    queryPosts = Post.objects.filter(poster__in=following).order_by('-timestamp').all()
+    inList = []
+    for post in queryPosts:
+        inList.append(post.serialize())
+    return JsonResponse(inList, safe=False)
+
 def get_user(request, username):
     user = User.objects.get(username=username)
     profile = Profile.objects.get(user=user)
     jsonProfile = profile.serialize()
-    postsForUser = Post.objects.filter(poster=user).order_by('-timestamp').all()
+    postsForUser = Post.objects.filter(
+        poster=user).order_by('-timestamp').all()
     jsonPostsForUser = []
     for post in postsForUser:
         jsonPostsForUser.append(post.serialize())
@@ -103,6 +114,7 @@ def posts(request):
         inList.append(post.serialize())
 
     return JsonResponse(inList, safe=False)
+
 
 def posts_for_user(request, username):
     user = User.objects.get(username=username)
