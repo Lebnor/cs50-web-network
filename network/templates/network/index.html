@@ -22,14 +22,20 @@
     window.onpopstate = function (event) {
         if (event.state.user) {
             profileView(event.state.user);
-        } else if (event.state.view) {
+        } else if (event.state.view === 'main') {
             mainView();
+        } else if (event.state.view === 'follow') {
+            followView();
         }
+    }
+
+    function followView() {
+        // todo
     }
 
     function profileView(username) {
 
-        fetch(`users/get/${username}`)
+        fetch(`get/${username}`)
             .then(response => response.json())
             .then(data => {
                 ReactDOM.render(<Profile postsForUser={data.postsForUser} profile={data.profile} filter={username} refresh={true} />, document.getElementById('root'));
@@ -76,7 +82,8 @@
         reload() {
 
             let searchTerm = this.props.filter ? `/${this.props.filter}` : '';
-            fetch(`posts${searchTerm}`)
+            console.log(searchTerm)
+            fetch(`/posts${searchTerm}`)
                 .then(response => response.json())
                 .then(data => {
                     this.setState({
@@ -522,7 +529,7 @@
                 <div key={post.id} className="post mx-2 mb-2 p-4 border border-info">
                     <p> <strong>Author: </strong> <a href="" onClick={(e) => {
                         e.preventDefault();
-                        history.pushState({ user: post.poster.username }, "", post.poster.username);
+                        history.pushState({ user: post.poster.username }, "", `users/${post.poster.username}`);
                         this.handleOnClick(post.poster.username);
                     }}>{post.poster.username} </a></p>
                     <p> <strong>Body: </strong> {post.text}</p>
@@ -628,15 +635,20 @@
 
     }
 
+    // decide which view to show
     if (window.location.pathname === "" || window.location.pathname === "/") {
         // load main view
         history.pushState({ view: 'main' }, "", "/");
         mainView();
         ReactDOM.render(<Posts posts={[]} />, document.getElementById('root'));
+    } else if (window.location.pathname === "/follow"){
+        history.pushState( {view: 'follow'}, "", "follow");
+        followView();
     } else {
         // load profile
-        let username = window.location.pathname.substr(1);
-        history.pushState({ username: username }, "", username);
+        let username = window.location.pathname.substr(7);
+        console.log(username);
+        history.pushState({ username: username }, "", `${username}`);
         profileView(username);
     }
 </script>
