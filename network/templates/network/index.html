@@ -595,13 +595,19 @@
             })
             let id = this.props.post.id
             let content = this.state.value;
-            fetch(`posts/edit/${id}/${content}`)
+            fetch(`/posts/edit/${id}/${content}`)
                 .then(response => response.json())
                 .then(result => {
                     this.setState({
                         text: result.post.text
                     })
                     this.closeEditMode();
+                })
+                .catch(e => {
+                    console.log(e);
+                    this.setState({
+                        loading: false
+                    })
                 })
         }
         handleOnChange(event) {
