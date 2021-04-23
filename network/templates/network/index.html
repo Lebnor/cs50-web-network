@@ -311,7 +311,7 @@
             </div>;
 
             let content;
-            if (context.user === 'AnonymousUser') { // not logged in
+            if (context.user.username === 'AnonymousUser') { // not logged in
                 content = notLoggedIn;
             } else {
                 content = loggedIn;
@@ -397,12 +397,12 @@
 
 
         isInFollowing() {
-            console.log(context.user)
+            console.log(context.user.username)
             let profile = this.state.profile;
             for (let i = 0; i < profile.followers.length; i++) {
                 console.log(profile.followers[i])
 
-                if (profile.followers[i].username === context.user) {
+                if (profile.followers[i].username === context.user.username) {
                     return true;
                 }
             }

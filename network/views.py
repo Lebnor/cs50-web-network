@@ -56,6 +56,7 @@ def get_current_user(request):
     print(user)
     return JsonResponse(user)
 
+
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -90,13 +91,16 @@ def get_posts_following(request):
     user = request.user
     userProfile = Profile.objects.get(user=user)
     following = list(userProfile.following.all())
-    queryPosts = Post.objects.filter(poster__in=following).order_by('-timestamp').all()
+    queryPosts = Post.objects.filter(
+        poster__in=following).order_by('-timestamp').all()
     inList = []
     for post in queryPosts:
         inList.append(post.serialize())
     return JsonResponse(inList, safe=False)
 
 # returns a profile object for a user
+
+
 def get_user(request, username):
     user = User.objects.get(username=username)
     profile = Profile.objects.get(user=user)
@@ -106,7 +110,6 @@ def get_user(request, username):
     jsonPostsForUser = []
     for post in postsForUser:
         jsonPostsForUser.append(post.serialize())
-
 
     response = {
         'profile': jsonProfile,
@@ -119,7 +122,6 @@ def posts(request):
     # sort posts by reverse chronological order
     inList = []
     posts = Post.objects.order_by('-timestamp').all()
-
 
     for post in posts:
         inList.append(post.serialize())
@@ -149,22 +151,39 @@ def create(request, text):
 
 # give like to a post
 def like(request, id):
-    post = Post.objects.get(id=id)
-    post.likes = post.likes + 1
-    post.save()
+    try:
+        post = Post.objects.get(id=id)
+        post.likes = post.likes + 1
+        post.save()
+        like = Like(user=request.user, post=post)
+        like.save()
 
-    like = Like(user=request.user, post=post)
-    like.save()
+        return JsonResponse({
+            'message': f'succesfully liked post {id}',
+            'post': post.serialize()
+        })
+    except:
+        return JsonResponse({'message': f'failed to like post{id}'})
+
 # give dislike to a post
 
 
 def dislike(request, id):
-    post = Post.objects.get(id=id)
-    post.likes = post.likes - 1
-    post.save()
+    try:
+        post = Post.objects.get(id=id)
+        post.likes = post.likes - 1
+        post.save()
 
-    like = Like.objects.get(user=request.user, post=post)
-    like.delete()
+        like = Like.objects.get(user=request.user, post=post)
+        like.delete()
+
+        return JsonResponse({
+            'message': f'succesfully liked post {id}',
+            'post': post.serialize()
+        })
+    except:
+        return JsonResponse({'message': f'failed to dislike post{id}'})
+
 
 def edit(request, id, content):
     post = Post.objects.get(id=id)
@@ -174,7 +193,8 @@ def edit(request, id, content):
     return JsonResponse({
         'message': 'Succesfully edited',
         'post': post.serialize()
-        })
+    })
+
 
 def follow(request, username):
     try:
