@@ -17,11 +17,13 @@
 
     var context = {
         user: `{{ user }}`,
-        likes: `{{ likes }}`
     }
 
-    console.log(context.likes);
-
+    fetch("/users/current")
+        .then(response => response.json())
+        .then(result => {
+            context.user = result
+        })
     window.onpopstate = function (event) {
         if (event.state.user) {
             profileView(event.state.user);
@@ -33,6 +35,7 @@
     }
 
     function followView() {
+
         fetch("/posts/following")
             .then(response => response.json())
             .then(data => {
@@ -60,7 +63,27 @@
             })
             .catch(e => console.log(e));
     }
+    function binarySearch(sortedArray, key) {
+        let start = 0;
+        let end = sortedArray.length - 1;
 
+        while (start <= end) {
+            let middle = Math.floor((start + end) / 2);
+
+            if (sortedArray[middle] === key) {
+                // found the key
+                return middle;
+            } else if (sortedArray[middle] < key) {
+                // continue searching to the right
+                start = middle + 1;
+            } else {
+                // search searching to the left
+                end = middle - 1;
+            }
+        }
+        // key wasn't found
+        return -1;
+    }
     class FollowingView extends React.Component {
         constructor(props) {
             super(props)
@@ -315,7 +338,6 @@
             }
             return (
                 <div className="col-12 col-md-8 border border-info text-center  m-3">
-
                     <h3 className="text-white mb-3 mx-3"><span className="rounded p-2 px-3">New Post</span> </h3>
                     <div className="row  justify-content-center pb-2">
                         {content}
@@ -556,7 +578,9 @@
                 editMode: false,
                 text: this.props.post.text,
                 value: this.props.post.text,
-                loading: false
+                loading: false,
+                liked: false,
+                likesCount: this.props.post.likes
             }
         }
 
@@ -605,10 +629,65 @@
                 value: event.target.value
             })
         }
+
+        handleLike(event) {
+            this.setState({
+                liked: true,
+                likesCount: this.state.likesCount + 1
+            })
+            event.target.style.animationPlayState = 'running';
+            console.log('handleLike()');
+            let id = this.props.post.id;
+            console.log(id)
+            context.user.likes.push(id);
+
+            // TODO update post in database
+            fetch(`/posts/like/${id}`)
+        }
+        handleDislike(event) {
+            this.setState({
+                liked: false,
+                likesCount: this.state.likesCount - 1
+            })
+            event.preventDefault();
+            let id = this.props.post.id;
+            console.log(id);
+            const index = context.user.likes.indexOf(id);
+            if (index > -1) {
+                context.user.likes.splice(index, 1);
+            }
+
+            // TODO update post in database
+            fetch(`/posts/dislike/${id}`)
+        }
+        getLikeIcon(isLiked) {
+            if (isLiked) {
+                return (
+                    <i href="" className="jump bi bi-heart-fill text-danger"
+                        onClick={(e) => this.handleDislike(e)}>
+                    </i>
+                )
+            } else {
+                return (
+                    <i href="" className="bi bi-heart text-danger"
+                        onClick={(e) => this.handleLike(e)}>
+                    </i>
+                )
+            }
+        }
+
+        // TODO implement this more efficiently
+        isLiked() {
+            for (let i = 0; i < context.user.likes.length; i++) {
+                if (context.user.likes[i] == this.props.post.id)
+                    return true;
+            }
+            return false;
+        }
         render() {
             let post = this.props.post;
 
-            let isOwnPost = this.props.post.poster.username == context.user;
+            let isOwnPost = this.props.post.poster.username == context.user.username;
             let editButton = null;
             if (isOwnPost) {
                 editButton =
@@ -619,12 +698,12 @@
                     </button>
             }
 
-            
+
             let postBody = null;
             if (this.state.editMode) {
 
                 postBody =
-                    <div id={`edit${post.id}`} className="appear disappear shadow-sm w-100 border">
+                    <div id={`edit${post.id}`} className="appear disappear shadow-sm w-100">
 
                         <h5 className="text-warning mx-4 p-2 text-center"> Edit mode </h5>
                         <div>
@@ -636,7 +715,7 @@
                             </div>
                             <div className="row justify-content-end">
                                 <div className="col-auto">
-                                    <button onClick={() => this.handleSave()} className="btn btn-outline-success"> {this.state.loading || (<span className="bi bi-check-circle"> save</span> )} </button>
+                                    <button onClick={() => this.handleSave()} className="btn btn-outline-success"> {this.state.loading || (<span className="bi bi-check-circle"> save</span>)} </button>
                                     <button onClick={() => this.handleCancel()} className="m-2 btn btn-danger"><i className="bi bi-x-circle"></i> cancel </button>
                                 </div>
                             </div>
@@ -649,14 +728,8 @@
             }
 
 
-            // TODO binary search to determined if user liked this post
-            let isLikes = null;
-            for (let i = 0; i < context.likes.length; i++) {
-                if (post.id == context.likes[i].id){
-                    isLikes = <div>You liked this post</div>;
-                }
-            }
-
+            // determine if the user liked this post            
+            let likeIcon = this.getLikeIcon(this.isLiked());
 
             return (
                 <div key={post.id} className="shadow post mx-2 mb-2 p-4 border border-info">
@@ -670,10 +743,30 @@
                     }}>{post.poster.username} </a>
                     </p>
                     {postBody}
-                    <p> <i className="bi bi-heart text-danger"></i> {post.likes} {isLikes}</p>
+                    <p>{likeIcon} {this.state.likesCount} </p>
                     <p> <strong>Date: </strong> {post.timestamp} </p>
 
                 </div>
+            )
+        }
+    }
+
+    class LikeButton extends React.Component {
+        constructor(props) {
+            super(props)
+
+            this.icon = React.createRef();
+        }
+
+        handleOnClick(e) {
+            console.log(' clicked');
+            e.target.style.animationPlayState = 'running';
+
+            this.props.doClick();
+        }
+        render() {
+            return (
+                <i onClick={(e) => this.handleOnClick(e)} ref={this.icon} className="jump bi bi-heart text-danger"> </i>
             )
         }
     }

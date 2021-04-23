@@ -1,23 +1,47 @@
 html {
-    position: relative;
-    min-height: 100%;
+  position: relative;
+  min-height: 100%;
 }
 
 body {
-    overflow-y: scroll;
-    overflow-x: hidden;
-    margin: 0 0 100px;
-    padding-bottom: 200px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  margin: 0 0 100px;
+  padding-bottom: 200px;
 }
 
-.bi-heart {
+.jump {
+  display: inline-block;
+  animation-name: jump;
+  animation-duration: 1s;
+  animation-play-state: paused;
+  animation-iteration-count: 1;
+  transform: scale(1);
+}
 
+@keyframes jump {
+  0% {
+    transform: scale(1);
+  }
+
+  35% {
+    transform: scale(1.3);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.bi-heart:hover,
+.bi-heart-fill:hover {
+  cursor: pointer;
 }
 
 footer {
-    min-width: 100vw;
-    position: absolute;
-    bottom: 0px;
+  min-width: 100vw;
+  position: absolute;
+  bottom: 0px;
 }
 h3 {
   font-weight: 400;
@@ -121,18 +145,17 @@ span > span {
 }
 
 .disappear {
-    animation-name: disappear;
-    animation-duration: 0.5s;
-    animation-play-state: paused;
+  animation-name: disappear;
+  animation-duration: 0.5s;
+  animation-play-state: paused;
 }
 @keyframes disappear {
+  0% {
+    opacity: 1;
+    height: fit-content;
+  }
 
-    0% {
-        opacity: 1;
-        height: fit-content;
-    }
-
-    100% {
-        opacity: 0;
-    }
+  100% {
+    opacity: 0;
+  }
 }

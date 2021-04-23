@@ -9,10 +9,18 @@ class ProfileAdmin(admin.ModelAdmin):
 
 class User(AbstractUser):
 
+
+    def getLikes(self):
+        likes = []
+        for like in self.liked.all():
+            likes.append(like.post.id)
+        return sorted(likes)
+    
     def serialize(self):
         return {
             "id": self.id,
-            "username": self.username
+            "username": self.username,
+            'likes': self.getLikes()
         }
     
     def __str__(self):
@@ -50,7 +58,7 @@ class Post(models.Model):
     timestamp = models.DateTimeField(default=datetime.now)
     likes = models.PositiveIntegerField(default=0, blank=True, null=True)
     likeCount = models.ManyToManyField(User)
-    
+
     def serialize(self):
         return {
             "id": self.pk,
@@ -72,10 +80,10 @@ class Like(models.Model):
 
     def serialize(self):
         return {
-            'user': self.user.serialize(),
-            'post': self.post.serialize()
+            'post': self.post.id
         }
-    
+    def __str__(self):
+        return f"user: {self.user.username}, post: {self.post.id}"
 
 class Comment(models.Model):
     text = models.TextField()

@@ -13,15 +13,9 @@ import json
 
 
 def index(request):
-    likes = Like.objects.filter(user=request.user).order_by('post_id').all()
-    likesJson = []
-    for like in likes:
-        likesJson.append(like.serialize())
-
 
     return render(request, "network/index.html", {
         'user': request.user,
-        'likes': SafeString(likesJson)
     })
 
 
@@ -55,6 +49,12 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
+
+def get_current_user(request):
+    print('get_current_user')
+    user = request.user.serialize()
+    print(user)
+    return JsonResponse(user)
 
 def register(request):
     if request.method == "POST":
@@ -96,6 +96,7 @@ def get_posts_following(request):
         inList.append(post.serialize())
     return JsonResponse(inList, safe=False)
 
+# returns a profile object for a user
 def get_user(request, username):
     user = User.objects.get(username=username)
     profile = Profile.objects.get(user=user)
@@ -152,6 +153,8 @@ def like(request, id):
     post.likes = post.likes + 1
     post.save()
 
+    like = Like(user=request.user, post=post)
+    like.save()
 # give dislike to a post
 
 
@@ -160,6 +163,8 @@ def dislike(request, id):
     post.likes = post.likes - 1
     post.save()
 
+    like = Like.objects.get(user=request.user, post=post)
+    like.delete()
 
 def edit(request, id, content):
     post = Post.objects.get(id=id)
