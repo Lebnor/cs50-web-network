@@ -51,9 +51,7 @@ def logout_view(request):
 
 
 def get_current_user(request):
-    print('get_current_user')
     user = request.user.serialize()
-    print(user)
     return JsonResponse(user)
 
 
@@ -166,8 +164,6 @@ def like(request, id):
         return JsonResponse({'message': f'failed to like post{id}'})
 
 # give dislike to a post
-
-
 def dislike(request, id):
     try:
         post = Post.objects.get(id=id)
@@ -189,7 +185,6 @@ def edit(request, id, content):
     post = Post.objects.get(id=id)
     post.text = content
     post.save()
-    print(post)
     return JsonResponse({
         'message': 'Succesfully edited',
         'post': post.serialize()

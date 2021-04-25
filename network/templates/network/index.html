@@ -23,6 +23,25 @@
         .then(response => response.json())
         .then(result => {
             context.user = result
+            console.log('set context user')
+            
+            // decide which view to show
+            if (window.location.pathname === "" || window.location.pathname === "/") {
+                // load main view
+                history.pushState({ view: 'main' }, "", "/");
+                mainView();
+                ReactDOM.render(<Posts posts={[]} />, document.getElementById('root'));
+            } else if (window.location.pathname === "/follow") {
+                history.pushState({ view: 'follow' }, "", "follow");
+                followView();
+            } else {
+                // load profile
+                let username = window.location.pathname.substr(7);
+                console.log(username);
+                history.pushState({ username: username }, "", `${username}`);
+                profileView(username);
+            }
+
         })
     window.onpopstate = function (event) {
         if (event.state.user) {
@@ -63,7 +82,7 @@
             })
             .catch(e => console.log(e));
     }
-    
+
     class FollowingView extends React.Component {
         constructor(props) {
             super(props)
@@ -617,6 +636,7 @@
         }
 
         handleLike(event) {
+            event.preventDefault();
             this.setState({
                 liked: true,
                 likesCount: this.state.likesCount + 1
@@ -624,7 +644,6 @@
             event.target.style.animationPlayState = 'running';
             console.log('handleLike()');
             let id = this.props.post.id;
-            console.log(id)
             context.user.likes.push(id);
 
             // TODO update post in database
@@ -636,8 +655,8 @@
                 likesCount: this.state.likesCount - 1
             })
             event.preventDefault();
+            event.target.style.animationPlayState = 'running';
             let id = this.props.post.id;
-            console.log(id);
             const index = context.user.likes.indexOf(id);
             if (index > -1) {
                 context.user.likes.splice(index, 1);
@@ -655,7 +674,7 @@
                 )
             } else {
                 return (
-                    <i href="" className="bi bi-heart text-danger"
+                    <i href="" className="shake bi bi-heart text-danger"
                         onClick={(e) => this.handleLike(e)}>
                     </i>
                 )
@@ -838,7 +857,7 @@
                             </div>
 
                             <div className="row justify-content-center">
-                                <div className="col-10 col-md-8">
+                                <div className="col-12 col-md-8">
                                     <Paginator data={posts} filter={''}> </Paginator>
                                 </div>
                             </div>
@@ -851,22 +870,7 @@
 
     }
 
-    // decide which view to show
-    if (window.location.pathname === "" || window.location.pathname === "/") {
-        // load main view
-        history.pushState({ view: 'main' }, "", "/");
-        mainView();
-        ReactDOM.render(<Posts posts={[]} />, document.getElementById('root'));
-    } else if (window.location.pathname === "/follow") {
-        history.pushState({ view: 'follow' }, "", "follow");
-        followView();
-    } else {
-        // load profile
-        let username = window.location.pathname.substr(7);
-        console.log(username);
-        history.pushState({ username: username }, "", `${username}`);
-        profileView(username);
-    }
+
 </script>
 
 {% endblock %}

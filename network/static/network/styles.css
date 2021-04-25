@@ -6,7 +6,7 @@ html {
 body {
   overflow-y: scroll;
   overflow-x: hidden;
-  margin: 0 0 100px;
+  margin: 0 0 200px;
   padding-bottom: 200px;
 }
 
@@ -19,6 +19,9 @@ body {
   transform: scale(1);
 }
 
+footer {
+  bottom: 0px;
+}
 @keyframes jump {
   0% {
     transform: scale(1);
@@ -36,6 +39,37 @@ body {
 .bi-heart:hover,
 .bi-heart-fill:hover {
   cursor: pointer;
+}
+
+.shake {
+  display: inline-block;
+  animation-name: shake;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
+  animation-play-state: paused;
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(0deg);
+  }
+  10%, 30%, 50% {
+    transform: rotate(10deg);
+  }
+
+  20%, 40%, 60% {
+    transform: rotate(-10deg);
+  }
+
+  70% {
+    transform: rotate(5deg);
+  }
+  80% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 footer {

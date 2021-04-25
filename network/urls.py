@@ -1,11 +1,12 @@
 
 from django.urls import path
 from django.contrib import admin
-
+from django.views.generic import TemplateView 
 from . import views
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    # path("", views.index, name="index"),
+    path('', TemplateView.as_view(template_name='index.html')),
     path('admin', admin.site.urls),
     path("login", views.login_view, name="login"),
     path("logout", views.logout_view, name="logout"),
@@ -18,9 +19,9 @@ urlpatterns = [
     path("posts/create/<str:text>", views.create, name="create"),
     path("posts/edit/<int:id>/<str:content>", views.edit, name="edit"),
     path("posts/<str:username>", views.posts_for_user, name="posts_for_user"),
+    path("users/current", views.get_current_user, name="current"),
     path("users/get/<str:username>", views.get_user, name="get_user"),
     path("users/follow/<str:username>", views.follow, name="follow"),
     path("users/unfollow/<str:username>", views.unfollow, name="unfollow"),
-    path("users/current", views.get_current_user, name="current"),
     path("users/<str:profile>", views.profile, name="profile"),
 ]

@@ -57,7 +57,6 @@ class Post(models.Model):
     text = models.TextField()
     timestamp = models.DateTimeField(default=datetime.now)
     likes = models.PositiveIntegerField(default=0, blank=True, null=True)
-    likeCount = models.ManyToManyField(User)
 
     def serialize(self):
         return {
