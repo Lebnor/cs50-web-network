@@ -6,7 +6,7 @@ from . import views
 
 urlpatterns = [
     # path("", views.index, name="index"),
-    path('', TemplateView.as_view(template_name='index.html')),
+    path('.*', TemplateView.as_view(template_name='index.html')),
     path('admin', admin.site.urls),
     path("login", views.login_view, name="login"),
     path("logout", views.logout_view, name="logout"),
