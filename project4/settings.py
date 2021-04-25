@@ -56,6 +56,9 @@ ROOT_URLCONF = 'project4.urls'
 
 SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
 
+TEMPLATE_DIRS = [
+    os.path.join(BASE_DIR, 'network-frontend/build')
+]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
