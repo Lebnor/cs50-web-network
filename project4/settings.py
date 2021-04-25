@@ -54,11 +54,14 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'project4.urls'
 
+SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'network-frontend/build')
+            os.path.join(BASE_DIR, 'network-frontend/build'),
+            os.path.join(BASE_DIR, 'templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -134,8 +137,6 @@ django_heroku.settings(locals())
 # Heroku: Update database configuration from $DATABASE_URL.
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
-
-
 
 
 # Simplified static file serving.
