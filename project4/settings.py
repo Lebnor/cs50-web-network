@@ -58,7 +58,7 @@ SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
 
 TEMPLATE_DIRS = [
     BASE_DIR,
-    os.path.join(BASE_DIR, 'Templates'),
+    os.path.join(BASE_DIR, 'templates'),
     os.path.join(BASE_DIR, 'network-frontend/build')
 ]
 TEMPLATES = [
@@ -66,7 +66,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, 'network-frontend/build'),
-            os.path.join(BASE_DIR, 'Templates')
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'network-frontend/build.templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
