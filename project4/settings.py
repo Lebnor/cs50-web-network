@@ -57,6 +57,8 @@ ROOT_URLCONF = 'project4.urls'
 SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
 
 TEMPLATE_DIRS = [
+    BASE_DIR,
+    os.path.join(BASE_DIR, 'Templates'),
     os.path.join(BASE_DIR, 'network-frontend/build')
 ]
 TEMPLATES = [
