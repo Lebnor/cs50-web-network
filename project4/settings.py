@@ -67,7 +67,8 @@ TEMPLATES = [
         'DIRS': [
             os.path.join(BASE_DIR, 'network-frontend/build'),
             os.path.join(BASE_DIR, 'templates'),
-            os.path.join(BASE_DIR, 'network-frontend/build.templates')
+            os.path.join(BASE_DIR, 'network-frontend/build/templates'),
+            os.path.join(BASE_DIR, 'network-frontend/build/templates/index.html')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
